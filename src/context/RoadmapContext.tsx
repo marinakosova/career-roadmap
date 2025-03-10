@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 export interface Skill {
   id: string;
@@ -17,37 +17,37 @@ interface Milestone {
 
 interface RoadmapContextType {
   currentRole: string;
-  setCurrentRole: (role: string) => void;
+  setCurrentRole: Dispatch<SetStateAction<string>>;
   currentLevel: string;
-  setCurrentLevel: (level: string) => void;
+  setCurrentLevel: Dispatch<SetStateAction<string>>;
   experience: string;
-  setExperience: (experience: string) => void;
+  setExperience: Dispatch<SetStateAction<string>>;
   desiredRole: string;
-  setDesiredRole: (role: string) => void;
+  setDesiredRole: Dispatch<SetStateAction<string>>;
   desiredLevel: string;
-  setDesiredLevel: (level: string) => void;
+  setDesiredLevel: Dispatch<SetStateAction<string>>;
   background: string;
-  setBackground: (background: string) => void;
+  setBackground: Dispatch<SetStateAction<string>>;
   skills: Skill[];
-  setSkills: (skills: Skill[]) => void;
+  setSkills: Dispatch<SetStateAction<Skill[]>>;
   selectedSkills: Skill[];
-  setSelectedSkills: (skills: Skill[]) => void;
+  setSelectedSkills: Dispatch<SetStateAction<Skill[]>>;
   currentState: string;
-  setCurrentState: (state: string) => void;
+  setCurrentState: Dispatch<SetStateAction<string>>;
   desiredIndustry: string;
-  setDesiredIndustry: (industry: string) => void;
+  setDesiredIndustry: Dispatch<SetStateAction<string>>;
   companySize: string;
-  setCompanySize: (size: string) => void;
+  setCompanySize: Dispatch<SetStateAction<string>>;
   budget: string;
-  setBudget: (budget: string) => void;
+  setBudget: Dispatch<SetStateAction<string>>;
   timeCommitment: string;
-  setTimeCommitment: (time: string) => void;
+  setTimeCommitment: Dispatch<SetStateAction<string>>;
   milestones: Milestone[];
-  setMilestones: (milestones: Milestone[]) => void;
+  setMilestones: Dispatch<SetStateAction<Milestone[]>>;
   completedMilestones: number;
-  setCompletedMilestones: (count: number) => void;
+  setCompletedMilestones: Dispatch<SetStateAction<number>>;
   nextDeadline: string;
-  setNextDeadline: (deadline: string) => void;
+  setNextDeadline: Dispatch<SetStateAction<string>>;
 }
 
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
@@ -122,7 +123,7 @@ const BuildRoadmap = () => {
   }, [currentRole]);
 
   const toggleSkill = (skill: string) => {
-    setSelectedSkills((prev: Skill[]) => {
+    setSelectedSkills(prev => {
       const isSelected = prev.some(s => s.name === skill);
       
       if (isSelected) {
