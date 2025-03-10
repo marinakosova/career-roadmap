@@ -65,7 +65,7 @@ const Roadmap = () => {
         <div className="container mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h1 className="text-3xl font-bold">
-              Your roadmap to <span className="text-primary">{desiredRole}</span>
+              Your roadmap to <span className="text-primary">{desiredRole || "Your Career Goal"}</span>
             </h1>
             <Link 
               to="/build-roadmap" 
@@ -165,7 +165,8 @@ const Roadmap = () => {
           {/* Milestones Tab */}
           <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
             <div className="space-y-8">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              {/* Overall Progress Card - Updated with subtle background */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 bg-soft-purple">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center">
                     <TrendingUp className="h-5 w-5 text-primary mr-2" />
@@ -177,7 +178,7 @@ const Roadmap = () => {
                 <Progress value={overallProgress} className="h-3 mb-4" />
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center bg-white p-3 rounded-lg">
                     <Award className="h-5 w-5 text-primary mr-2" />
                     <div>
                       <div className="text-sm text-gray-500">Milestones</div>
@@ -185,7 +186,7 @@ const Roadmap = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center bg-white p-3 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-primary mr-2" />
                     <div>
                       <div className="text-sm text-gray-500">Completed</div>
@@ -193,7 +194,7 @@ const Roadmap = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center bg-white p-3 rounded-lg">
                     <Clock className="h-5 w-5 text-primary mr-2" />
                     <div>
                       <div className="text-sm text-gray-500">Estimated Time</div>

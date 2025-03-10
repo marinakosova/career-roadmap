@@ -116,6 +116,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
             "p-1.5 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors",
             index === 0 && "opacity-50 cursor-not-allowed"
           )}
+          aria-label="Move milestone up"
         >
           <MoveUp className="h-4 w-4 text-gray-500" />
         </button>
@@ -126,6 +127,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
             "p-1.5 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors",
             index === totalMilestones - 1 && "opacity-50 cursor-not-allowed"
           )}
+          aria-label="Move milestone down"
         >
           <MoveDown className="h-4 w-4 text-gray-500" />
         </button>
@@ -166,6 +168,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
               <button 
                 onClick={handleExpandToggle}
                 className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label={expanded ? "Collapse milestone" : "Expand milestone"}
               >
                 {expanded ? (
                   <ChevronUp className="h-5 w-5 text-gray-500" />
@@ -225,6 +228,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
                         <button
                           onClick={() => handleStepToggle(step.id, step.completed)}
                           className="mt-0.5 mr-3 flex-shrink-0"
+                          aria-label={step.completed ? "Mark as incomplete" : "Mark as complete"}
                         >
                           {step.completed ? (
                             <CheckSquare className="h-5 w-5 text-primary" />
@@ -267,12 +271,14 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
                           <button
                             onClick={() => handleStepEdit(step.id, step.description)}
                             className="p-1 rounded-full hover:bg-gray-100"
+                            aria-label="Edit step"
                           >
                             <Edit className="h-4 w-4 text-gray-500" />
                           </button>
                           <button
                             onClick={() => handleDelete(step.id)}
                             className="p-1 rounded-full hover:bg-gray-100"
+                            aria-label="Delete step"
                           >
                             <Trash className="h-4 w-4 text-gray-500" />
                           </button>
@@ -371,6 +377,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
                   feedback === 'like' && "bg-green-50 border-green-200 text-green-600"
                 )}
                 onClick={() => toggleMilestoneFeedback(id, 'like')}
+                aria-label="Mark as helpful"
               >
                 <ThumbsUp className="h-4 w-4" />
                 Helpful
@@ -383,6 +390,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
                   feedback === 'dislike' && "bg-red-50 border-red-200 text-red-600"
                 )}
                 onClick={() => toggleMilestoneFeedback(id, 'dislike')}
+                aria-label="Mark as not helpful"
               >
                 <ThumbsDown className="h-4 w-4" />
                 Not helpful
