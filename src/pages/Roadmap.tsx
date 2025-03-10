@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, Target, Calendar, Flag, CheckCircle, CheckSquare, BookOpen, MessageSquare } from 'lucide-react';
+import { RefreshCw, Target, Calendar, Flag, CheckCircle, CheckSquare, BookOpen, MessageSquare, Clock, Award, TrendingUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoadmap } from '@/context/RoadmapContext';
+import { Progress } from "@/components/ui/progress";
 import StatCard from '@/components/StatCard';
 import RoadmapChart from '@/components/RoadmapChart';
+import MilestoneCard from '@/components/MilestoneCard';
 
 // Sample market data
 const marketData = [
@@ -37,27 +39,24 @@ const similarRoles = [
 
 const Roadmap = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [overallProgress, setOverallProgress] = useState(0);
   
   const {
     desiredRole,
     milestones,
     completedMilestones,
     nextDeadline,
-    setCompletedMilestones,
   } = useRoadmap();
 
-  const toggleMilestoneCompletion = (id: string) => {
-    const updatedMilestones = milestones.map(milestone => {
-      if (milestone.id === id) {
-        const updatedMilestone = { ...milestone, completed: !milestone.completed };
-        return updatedMilestone;
-      }
-      return milestone;
-    });
-    
-    const newCompletedCount = updatedMilestones.filter(m => m.completed).length;
-    setCompletedMilestones(newCompletedCount);
-  };
+  // Calculate overall progress based on milestones
+  useEffect(() => {
+    if (milestones.length > 0) {
+      const totalProgress = milestones.reduce((sum, milestone) => sum + milestone.progress, 0);
+      setOverallProgress(Math.round(totalProgress / milestones.length));
+    } else {
+      setOverallProgress(0);
+    }
+  }, [milestones]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -165,48 +164,79 @@ const Roadmap = () => {
 
           {/* Milestones Tab */}
           <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold mb-6">Your Career Milestones</h2>
-              
-              <div className="space-y-6">
-                {milestones.map((milestone, index) => (
-                  <div 
-                    key={milestone.id} 
-                    className={`relative pl-8 pb-8 ${
-                      index !== milestones.length - 1 ? 'border-l-2 border-gray-200 ml-3' : ''
-                    }`}
-                  >
-                    <div className="absolute left-0 top-0 -ml-3 h-6 w-6 rounded-full bg-white border-2 border-primary flex items-center justify-center">
-                      {milestone.completed ? (
-                        <CheckCircle className="h-4 w-4 text-primary" />
-                      ) : (
-                        <span className="h-2 w-2 rounded-full bg-primary"></span>
-                      )}
-                    </div>
-                    
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-2">{milestone.title}</h3>
-                          <p className="text-gray-600 mb-4">{milestone.description}</p>
-                          <div className="inline-block bg-secondary text-primary text-sm px-3 py-1 rounded-full">
-                            {milestone.timeline}
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => toggleMilestoneCompletion(milestone.id)}
-                          className={`p-2 rounded-md transition-colors ${
-                            milestone.completed 
-                              ? 'bg-primary/10 text-primary' 
-                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                          }`}
-                        >
-                          <CheckSquare className="h-5 w-5" />
-                        </button>
-                      </div>
+            <div className="space-y-8">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center">
+                    <TrendingUp className="h-5 w-5 text-primary mr-2" />
+                    <h3 className="text-xl font-semibold">Overall Progress</h3>
+                  </div>
+                  <div className="text-2xl font-bold text-primary">{overallProgress}%</div>
+                </div>
+                
+                <Progress value={overallProgress} className="h-3 mb-4" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                    <Award className="h-5 w-5 text-primary mr-2" />
+                    <div>
+                      <div className="text-sm text-gray-500">Milestones</div>
+                      <div className="font-semibold">{milestones.length} total</div>
                     </div>
                   </div>
-                ))}
+                  
+                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    <div>
+                      <div className="text-sm text-gray-500">Completed</div>
+                      <div className="font-semibold">{completedMilestones} milestones</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center bg-gray-50 p-3 rounded-lg">
+                    <Clock className="h-5 w-5 text-primary mr-2" />
+                    <div>
+                      <div className="text-sm text-gray-500">Estimated Time</div>
+                      <div className="font-semibold">{milestones.length * 2} weeks</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="relative pl-8">
+                <h2 className="text-2xl font-bold mb-6">Your Career Milestones</h2>
+                
+                <div className="space-y-2">
+                  {milestones.map((milestone, index) => (
+                    <MilestoneCard 
+                      key={milestone.id}
+                      id={milestone.id}
+                      index={index}
+                      title={milestone.title}
+                      description={milestone.description}
+                      timeline={milestone.timeline}
+                      completed={milestone.completed}
+                      progress={milestone.progress}
+                      skills={milestone.skills || []}
+                      steps={milestone.steps || []}
+                      tools={milestone.tools || []}
+                      resources={milestone.resources || []}
+                      feedback={milestone.feedback}
+                      isLast={index === milestones.length - 1}
+                      totalMilestones={milestones.length}
+                    />
+                  ))}
+                  
+                  {milestones.length === 0 && (
+                    <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                      <Target className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-medium text-gray-600">No milestones yet</h3>
+                      <p className="text-gray-500 max-w-md mx-auto mt-2">
+                        Complete the roadmap builder to generate personalized career milestones.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </TabsContent>

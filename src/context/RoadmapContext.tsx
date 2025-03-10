@@ -7,12 +7,36 @@ export interface Skill {
   selected?: boolean;
 }
 
-interface Milestone {
+export interface ActionableStep {
+  id: string;
+  description: string;
+  completed: boolean;
+  deadline?: string;
+}
+
+export interface Tool {
+  id: string;
+  name: string;
+}
+
+export interface Resource {
+  id: string;
+  name: string;
+  url?: string;
+}
+
+export interface Milestone {
   id: string;
   title: string;
   description: string;
   timeline: string;
   completed: boolean;
+  progress: number;
+  skills: Skill[];
+  steps: ActionableStep[];
+  tools: Tool[];
+  resources: Resource[];
+  feedback?: 'like' | 'dislike' | null;
 }
 
 interface RoadmapContextType {
@@ -48,6 +72,11 @@ interface RoadmapContextType {
   setCompletedMilestones: Dispatch<SetStateAction<number>>;
   nextDeadline: string;
   setNextDeadline: Dispatch<SetStateAction<string>>;
+  swapMilestones: (indexA: number, indexB: number) => void;
+  updateMilestoneStep: (milestoneId: string, stepId: string, updates: Partial<ActionableStep>) => void;
+  addMilestoneStep: (milestoneId: string, step: Omit<ActionableStep, 'id'>) => void;
+  deleteMilestoneStep: (milestoneId: string, stepId: string) => void;
+  toggleMilestoneFeedback: (milestoneId: string, feedback: 'like' | 'dislike') => void;
 }
 
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
@@ -69,6 +98,116 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [completedMilestones, setCompletedMilestones] = useState(0);
   const [nextDeadline, setNextDeadline] = useState('');
+
+  const swapMilestones = (indexA: number, indexB: number) => {
+    setMilestones(prevMilestones => {
+      const newMilestones = [...prevMilestones];
+      [newMilestones[indexA], newMilestones[indexB]] = [newMilestones[indexB], newMilestones[indexA]];
+      return newMilestones;
+    });
+  };
+
+  const updateMilestoneStep = (milestoneId: string, stepId: string, updates: Partial<ActionableStep>) => {
+    setMilestones(prevMilestones => {
+      return prevMilestones.map(milestone => {
+        if (milestone.id === milestoneId) {
+          const updatedSteps = milestone.steps.map(step => 
+            step.id === stepId ? { ...step, ...updates } : step
+          );
+          
+          // Recalculate milestone progress
+          const completedSteps = updatedSteps.filter(step => step.completed).length;
+          const totalSteps = updatedSteps.length;
+          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+          
+          return { 
+            ...milestone, 
+            steps: updatedSteps,
+            progress,
+            completed: progress === 100
+          };
+        }
+        return milestone;
+      });
+    });
+    
+    // Update completedMilestones count
+    setMilestones(currentMilestones => {
+      const completed = currentMilestones.filter(m => m.completed).length;
+      setCompletedMilestones(completed);
+      return currentMilestones;
+    });
+  };
+
+  const addMilestoneStep = (milestoneId: string, step: Omit<ActionableStep, 'id'>) => {
+    setMilestones(prevMilestones => {
+      return prevMilestones.map(milestone => {
+        if (milestone.id === milestoneId) {
+          const newStep = {
+            id: `step-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            ...step
+          };
+          const updatedSteps = [...milestone.steps, newStep];
+          
+          // Recalculate milestone progress
+          const completedSteps = updatedSteps.filter(step => step.completed).length;
+          const totalSteps = updatedSteps.length;
+          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+          
+          return { 
+            ...milestone, 
+            steps: updatedSteps,
+            progress
+          };
+        }
+        return milestone;
+      });
+    });
+  };
+
+  const deleteMilestoneStep = (milestoneId: string, stepId: string) => {
+    setMilestones(prevMilestones => {
+      return prevMilestones.map(milestone => {
+        if (milestone.id === milestoneId) {
+          const updatedSteps = milestone.steps.filter(step => step.id !== stepId);
+          
+          // Recalculate milestone progress
+          const completedSteps = updatedSteps.filter(step => step.completed).length;
+          const totalSteps = updatedSteps.length;
+          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+          
+          return { 
+            ...milestone, 
+            steps: updatedSteps,
+            progress,
+            completed: progress === 100
+          };
+        }
+        return milestone;
+      });
+    });
+    
+    // Update completedMilestones count
+    setMilestones(currentMilestones => {
+      const completed = currentMilestones.filter(m => m.completed).length;
+      setCompletedMilestones(completed);
+      return currentMilestones;
+    });
+  };
+
+  const toggleMilestoneFeedback = (milestoneId: string, feedback: 'like' | 'dislike') => {
+    setMilestones(prevMilestones => {
+      return prevMilestones.map(milestone => {
+        if (milestone.id === milestoneId) {
+          return { 
+            ...milestone, 
+            feedback: milestone.feedback === feedback ? null : feedback
+          };
+        }
+        return milestone;
+      });
+    });
+  };
 
   return (
     <RoadmapContext.Provider
@@ -105,6 +244,11 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
         setCompletedMilestones,
         nextDeadline,
         setNextDeadline,
+        swapMilestones,
+        updateMilestoneStep,
+        addMilestoneStep,
+        deleteMilestoneStep,
+        toggleMilestoneFeedback,
       }}
     >
       {children}
