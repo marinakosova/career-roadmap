@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
@@ -7,7 +6,6 @@ import SkillTag from '@/components/SkillTag';
 import { useRoadmap } from '@/context/RoadmapContext';
 import { toast } from 'sonner';
 
-// Sample skills based on roles
 const roleSkills: Record<string, string[]> = {
   'software developer': ['JavaScript', 'React', 'Node.js', 'TypeScript', 'Git', 'API Design', 'CSS', 'HTML', 'MongoDB'],
   'product manager': ['User Research', 'Agile', 'Roadmapping', 'Stakeholder Management', 'Data Analysis', 'UX Design', 'Market Research'],
@@ -53,7 +51,6 @@ const BuildRoadmap = () => {
     setNextDeadline
   } = useRoadmap();
 
-  // Initialize milestones when generating roadmap
   const generateRoadmap = () => {
     if (!desiredRole.trim()) {
       toast.error("Please enter your desired role");
@@ -101,27 +98,23 @@ const BuildRoadmap = () => {
     setMilestones(milestones);
     setCompletedMilestones(0);
     
-    // Set a deadline 6 months from now
     const deadline = new Date();
     deadline.setMonth(deadline.getMonth() + 1);
     setNextDeadline(deadline.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
 
     toast.success("Creating your personalized roadmap...");
     
-    // Navigate to the roadmap page
     setTimeout(() => {
       navigate('/roadmap');
     }, 1500);
   };
 
-  // Update suggested skills when current role changes
   useEffect(() => {
     const normalizedRole = currentRole.toLowerCase().trim();
     
     if (normalizedRole && roleSkills[normalizedRole]) {
       setSuggestedSkills(roleSkills[normalizedRole]);
     } else {
-      // If role not found in our mapping, provide generic skills
       const allSkills = Object.values(roleSkills).flat();
       const uniqueSkills = [...new Set(allSkills)];
       setSuggestedSkills(uniqueSkills.slice(0, 10));
@@ -130,7 +123,6 @@ const BuildRoadmap = () => {
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills(prev => {
-      // Fix the type issue by correctly typing the function parameter
       const isSelected = prev.some(s => s.name === skill);
       
       if (isSelected) {

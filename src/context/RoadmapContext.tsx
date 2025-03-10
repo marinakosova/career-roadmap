@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface Skill {
+export interface Skill {
   id: string;
   name: string;
   selected?: boolean;
