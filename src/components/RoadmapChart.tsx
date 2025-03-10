@@ -19,6 +19,7 @@ interface RoadmapChartProps {
   xAxisLabel?: string;
 }
 
+// Modified to explicitly return string
 const formatYAxisTick = (value: number): string => {
   if (value >= 1000) {
     return `${value / 1000}k`;
