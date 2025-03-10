@@ -34,7 +34,7 @@ const RoadmapHeader: React.FC<RoadmapHeaderProps> = ({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold">
-              {desiredRole || "Your Career Goal"}
+              Your roadmap to <span className="text-primary">{desiredRole || "Your Career Goal"}</span>
             </h1>
             {milestonesExist && (
               <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
