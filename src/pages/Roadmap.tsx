@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, Target, Calendar, CheckSquare, Save, TrendingUp } from 'lucide-react';
+import { RefreshCw, Target, Calendar, CheckSquare, Save, TrendingUp, BookOpen, MessageSquare, Flag } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoadmap } from '@/context/RoadmapContext';
 import { toast } from "sonner";

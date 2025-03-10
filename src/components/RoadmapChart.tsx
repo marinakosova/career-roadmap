@@ -19,11 +19,11 @@ interface RoadmapChartProps {
   xAxisLabel?: string;
 }
 
-const formatYAxisTick = (value: number) => {
+const formatYAxisTick = (value: number): string => {
   if (value >= 1000) {
     return `${value / 1000}k`;
   }
-  return value;
+  return value.toString();
 };
 
 const RoadmapChart: React.FC<RoadmapChartProps> = ({ 
