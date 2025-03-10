@@ -1,41 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, Target, Calendar, CheckSquare, Save, TrendingUp, BookOpen, MessageSquare, Flag } from 'lucide-react';
+import { RefreshCw, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoadmap } from '@/context/RoadmapContext';
 import { toast } from "sonner";
+import Navigation from '@/components/Navigation';
 import StatCard from '@/components/StatCard';
-import RoadmapChart from '@/components/RoadmapChart';
-import MilestoneCard from '@/components/MilestoneCard';
-
-// Enhanced market data with better labels
-const marketData = [
-  { name: '2022', value: 5000, label: '5,000 Open Positions' },
-  { name: '2023', value: 7500, label: '7,500 Open Positions' },
-  { name: '2024', value: 10000, label: '10,000 Open Positions' },
-  { name: '2025', value: 14000, label: '14,000 Open Positions' },
-  { name: '2026', value: 18000, label: '18,000 Open Positions' },
-  { name: '2027', value: 20000, label: '20,000 Open Positions' },
-];
-
-// Enhanced salary data with better labels
-const salaryData = [
-  { name: 'Entry', value: 50000, label: '$50,000 Annual Salary' },
-  { name: 'Junior', value: 70000, label: '$70,000 Annual Salary' },
-  { name: 'Mid', value: 90000, label: '$90,000 Annual Salary' },
-  { name: 'Senior', value: 120000, label: '$120,000 Annual Salary' },
-  { name: 'Lead', value: 150000, label: '$150,000 Annual Salary' },
-];
-
-// Sample similar roles
-const similarRoles = [
-  'Product Owner', 
-  'Technical Product Manager', 
-  'UX Product Manager', 
-  'Digital Product Manager',
-  'Product Marketing Manager'
-];
+import { OverviewSection, ResourcesSection } from '@/components/roadmap/RoadmapSections';
 
 const Roadmap = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -52,7 +24,6 @@ const Roadmap = () => {
     timeCommitment
   } = useRoadmap();
 
-  // Calculate overall progress based on milestones
   useEffect(() => {
     if (milestones.length > 0) {
       const totalProgress = milestones.reduce((sum, milestone) => sum + milestone.progress, 0);
@@ -69,6 +40,8 @@ const Roadmap = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      <Navigation />
+      
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-6 py-8">
@@ -101,7 +74,7 @@ const Roadmap = () => {
             </div>
           </div>
           
-          {/* Display user preferences tags if provided */}
+          {/* User preferences tags */}
           {(budget || companySize || timeCommitment) && (
             <div className="flex flex-wrap gap-2 mt-4">
               {budget && (
@@ -121,27 +94,6 @@ const Roadmap = () => {
               )}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Dashboard Stats */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard 
-            icon={Target} 
-            value={milestones.length} 
-            label="Total Milestones" 
-          />
-          <StatCard 
-            icon={CheckSquare} 
-            value={completedMilestones} 
-            label="Completed" 
-          />
-          <StatCard 
-            icon={Calendar} 
-            value={nextDeadline} 
-            label="Upcoming Deadline" 
-          />
         </div>
       </div>
 
@@ -167,56 +119,12 @@ const Roadmap = () => {
             >
               Resources
             </TabsTrigger>
-            <TabsTrigger 
-              value="chat" 
-              className={`rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent opacity-50`}
-              disabled
-            >
-              AI Chat
-            </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="pt-8 animate-fade-in-up">
-            <div className="space-y-8">
-              <RoadmapChart 
-                data={marketData} 
-                color="#9B87F5" 
-                title="Market Projection" 
-                description="Estimated number of job openings for your target role over the next 5 years"
-                height={350}
-                chartType="bar"
-                yAxisLabel="Number of Jobs"
-                xAxisLabel="Year"
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <RoadmapChart 
-                  data={salaryData} 
-                  color="#0EA5E9" 
-                  title="Salary Projection" 
-                  description="Expected salary range as you progress through different career levels"
-                  chartType="line"
-                  yAxisLabel="Annual Salary (USD)"
-                  xAxisLabel="Career Level"
-                />
-                
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <h3 className="text-lg font-semibold mb-4">Similar Roles</h3>
-                  <ul className="space-y-3">
-                    {similarRoles.map((role, index) => (
-                      <li key={index} className="flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="h-2 w-2 rounded-full bg-primary mr-3"></div>
-                        <span>{role}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <OverviewSection />
           </TabsContent>
 
-          {/* Milestones Tab */}
           <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
             <div className="space-y-8">
               <div className="relative pl-8">
@@ -226,18 +134,8 @@ const Roadmap = () => {
                   {milestones.map((milestone, index) => (
                     <MilestoneCard 
                       key={milestone.id}
-                      id={milestone.id}
                       index={index}
-                      title={milestone.title}
-                      description={milestone.description}
-                      timeline={milestone.timeline}
-                      completed={milestone.completed}
-                      progress={milestone.progress}
-                      skills={milestone.skills || []}
-                      steps={milestone.steps || []}
-                      tools={milestone.tools || []}
-                      resources={milestone.resources || []}
-                      feedback={milestone.feedback}
+                      {...milestone}
                       isLast={index === milestones.length - 1}
                       totalMilestones={milestones.length}
                     />
@@ -257,127 +155,10 @@ const Roadmap = () => {
             </div>
           </TabsContent>
 
-          {/* Resources Tab */}
           <TabsContent value="resources" className="pt-8 animate-fade-in-up">
             <div className="space-y-6">
               <h2 className="text-2xl font-bold mb-6">Learning Resources</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="flex items-start">
-                    <div className="p-3 rounded-full bg-secondary/50 mr-4">
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Online Courses</h3>
-                      <p className="text-gray-600 mb-4">Comprehensive learning platforms to build your skills</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Coursera</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Udemy</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>LinkedIn Learning</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="flex items-start">
-                    <div className="p-3 rounded-full bg-secondary/50 mr-4">
-                      <MessageSquare className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Communities</h3>
-                      <p className="text-gray-600 mb-4">Connect with like-minded professionals</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Reddit</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Slack Communities</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>LinkedIn Groups</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="flex items-start">
-                    <div className="p-3 rounded-full bg-secondary/50 mr-4">
-                      <Target className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Career Development</h3>
-                      <p className="text-gray-600 mb-4">Tools to advance your professional growth</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Resume Builders</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Interview Practice</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Networking Events</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="flex items-start">
-                    <div className="p-3 rounded-full bg-secondary/50 mr-4">
-                      <Flag className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Industry Standards</h3>
-                      <p className="text-gray-600 mb-4">Stay updated with the latest in your field</p>
-                      <ul className="space-y-2">
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Industry Publications</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Research Papers</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
-                          <span>Certification Programs</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* AI Chat Tab */}
-          <TabsContent value="chat" className="pt-8 animate-fade-in-up">
-            <div className="flex flex-col items-center justify-center py-12">
-              <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-xl font-medium text-gray-600">AI Chat coming soon</h3>
-              <p className="text-gray-500 max-w-md text-center mt-2">
-                Our AI assistant will be available soon to answer your questions and provide personalized guidance.
-              </p>
+              <ResourcesSection />
             </div>
           </TabsContent>
         </Tabs>
@@ -387,3 +168,4 @@ const Roadmap = () => {
 };
 
 export default Roadmap;
+

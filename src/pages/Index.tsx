@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowRight, Sparkles, Trash2, LineChart, CheckCircle } from 'lucide-react';
 import FeatureCard from '@/components/FeatureCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -126,17 +126,17 @@ const Index = () => {
           <FeatureCard
             title="Personalized Career Roadmap"
             description="Get a tailored step-by-step plan to achieve your career goals based on your current skills and experience."
-            icon="Sparkles"
+            icon={Sparkles}
           />
           <FeatureCard
             title="Skill Gap Analysis"
             description="Identify the skills you need to develop to reach your target role and get resources to learn them."
-            icon="LineChart"
+            icon={LineChart}
           />
           <FeatureCard
             title="Progress Tracking"
             description="Track your career development journey with milestones and celebrate your achievements."
-            icon="CheckCircle"
+            icon={CheckCircle}
           />
         </div>
       </div>
@@ -145,3 +145,4 @@ const Index = () => {
 };
 
 export default Index;
+
