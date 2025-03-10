@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
@@ -64,35 +63,60 @@ const BuildRoadmap = () => {
         title: 'Skill Assessment & Gap Analysis',
         description: 'Identify your current skills and compare them with those required for your target role.',
         timeline: '2 weeks',
-        completed: false
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
       },
       {
         id: '2',
         title: 'Learning Path Creation',
         description: 'Develop a structured learning plan focused on acquiring the missing skills.',
         timeline: '1 month',
-        completed: false
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
       },
       {
         id: '3',
         title: 'Portfolio Development',
         description: 'Create projects that demonstrate your new skills and highlight your expertise.',
         timeline: '3 months',
-        completed: false
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
       },
       {
         id: '4',
         title: 'Network Building',
         description: 'Connect with professionals in your target field and attend industry events.',
         timeline: '2 months',
-        completed: false
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
       },
       {
         id: '5',
         title: 'Job Application Strategy',
         description: 'Prepare resume, cover letter, and interview skills tailored to your target role.',
         timeline: '1 month',
-        completed: false
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
       }
     ];
 
