@@ -1,9 +1,26 @@
 
-import { ArrowRight, Map, LineChart, Target } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Map, LineChart, Target, Trash2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Progress } from "@/components/ui/progress";
 import FeatureCard from "@/components/FeatureCard";
+import { useRoadmap } from "@/context/RoadmapContext";
+import { toast } from "sonner";
 
 const Index = () => {
+  const { savedRoadmaps, deleteRoadmap, loadRoadmap } = useRoadmap();
+  const navigate = useNavigate();
+
+  const handleRoadmapClick = (id: string) => {
+    loadRoadmap(id);
+    navigate('/roadmap');
+  };
+
+  const handleDeleteRoadmap = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    deleteRoadmap(id);
+    toast.success("Roadmap deleted successfully");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Section */}
@@ -26,6 +43,66 @@ const Index = () => {
           </Link>
         </div>
       </section>
+
+      {/* Saved Roadmaps Section */}
+      {savedRoadmaps.length > 0 && (
+        <section className="container mx-auto px-6 py-12 border-t border-gray-100">
+          <h2 className="text-2xl font-bold mb-6">Saved Roadmaps</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {savedRoadmaps.map((roadmap) => (
+              <div 
+                key={roadmap.id}
+                onClick={() => handleRoadmapClick(roadmap.id)}
+                className="bg-white rounded-xl shadow-md border border-gray-100 p-6 hover:shadow-lg transition-all cursor-pointer"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-semibold">{roadmap.title}</h3>
+                  <button 
+                    onClick={(e) => handleDeleteRoadmap(e, roadmap.id)}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                    aria-label="Delete roadmap"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-500">Overall Progress</span>
+                    <span className="font-medium">{roadmap.progress}%</span>
+                  </div>
+                  <Progress value={roadmap.progress} className="h-2" />
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-4 text-xs">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-800">
+                    {roadmap.milestones.length} milestones
+                  </span>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800">
+                    {roadmap.milestones.filter(m => m.completed).length} completed
+                  </span>
+                  
+                  {roadmap.budget && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                      {roadmap.budget}
+                    </span>
+                  )}
+                  
+                  {roadmap.timeCommitment && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-purple-100 text-purple-800">
+                      {roadmap.timeCommitment}
+                    </span>
+                  )}
+                </div>
+                
+                <p className="text-xs text-gray-500 mt-4">
+                  Created: {new Date(roadmap.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="container mx-auto px-6 py-16">

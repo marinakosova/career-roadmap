@@ -5,19 +5,22 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 interface ChartData {
   name: string;
   value: number;
+  label?: string;
 }
 
 interface RoadmapChartProps {
   data: ChartData[];
   color: string;
   title: string;
+  description?: string;
   height?: number;
 }
 
-const RoadmapChart: React.FC<RoadmapChartProps> = ({ data, color, title, height = 300 }) => {
+const RoadmapChart: React.FC<RoadmapChartProps> = ({ data, color, title, description, height = 300 }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold mb-1">{title}</h3>
+      {description && <p className="text-sm text-gray-500 mb-4">{description}</p>}
       <div style={{ height: `${height}px` }} className="w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
@@ -32,7 +35,12 @@ const RoadmapChart: React.FC<RoadmapChartProps> = ({ data, color, title, height 
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip 
+              formatter={(value: number, name: string) => {
+                const dataPoint = data.find(d => d.value === value);
+                return [dataPoint?.label || value, ''];
+              }}
+            />
             <Area type="monotone" dataKey="value" stroke={color} fill={color} fillOpacity={0.2} />
           </AreaChart>
         </ResponsiveContainer>

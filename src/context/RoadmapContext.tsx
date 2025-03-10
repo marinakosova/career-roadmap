@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 
 export interface Skill {
   id: string;
@@ -39,6 +38,18 @@ export interface Milestone {
   feedback?: 'like' | 'dislike' | null;
 }
 
+export interface SavedRoadmap {
+  id: string;
+  title: string;
+  createdAt: string;
+  progress: number;
+  milestones: Milestone[];
+  desiredRole: string;
+  budget?: string;
+  companySize?: string;
+  timeCommitment?: string;
+}
+
 interface RoadmapContextType {
   currentRole: string;
   setCurrentRole: Dispatch<SetStateAction<string>>;
@@ -72,6 +83,11 @@ interface RoadmapContextType {
   setCompletedMilestones: Dispatch<SetStateAction<number>>;
   nextDeadline: string;
   setNextDeadline: Dispatch<SetStateAction<string>>;
+  savedRoadmaps: SavedRoadmap[];
+  setSavedRoadmaps: Dispatch<SetStateAction<SavedRoadmap[]>>;
+  saveRoadmap: () => void;
+  deleteRoadmap: (id: string) => void;
+  loadRoadmap: (id: string) => void;
   swapMilestones: (indexA: number, indexB: number) => void;
   updateMilestoneStep: (milestoneId: string, stepId: string, updates: Partial<ActionableStep>) => void;
   addMilestoneStep: (milestoneId: string, step: Omit<ActionableStep, 'id'>) => void;
@@ -80,6 +96,8 @@ interface RoadmapContextType {
 }
 
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
+
+const STORAGE_KEY = 'career_roadmaps';
 
 export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentRole, setCurrentRole] = useState('');
@@ -98,6 +116,89 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [completedMilestones, setCompletedMilestones] = useState(0);
   const [nextDeadline, setNextDeadline] = useState('');
+  const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>([]);
+
+  useEffect(() => {
+    const loadSavedRoadmaps = () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsedData = JSON.parse(saved);
+          setSavedRoadmaps(parsedData);
+        } catch (error) {
+          console.error('Error loading saved roadmaps:', error);
+        }
+      }
+    };
+    
+    loadSavedRoadmaps();
+  }, []);
+
+  useEffect(() => {
+    if (savedRoadmaps.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRoadmaps));
+    }
+  }, [savedRoadmaps]);
+
+  const saveRoadmap = () => {
+    if (!desiredRole.trim() || milestones.length === 0) return;
+
+    const overallProgress = milestones.length > 0
+      ? Math.round(milestones.reduce((sum, m) => sum + m.progress, 0) / milestones.length)
+      : 0;
+
+    const newRoadmap: SavedRoadmap = {
+      id: `roadmap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      title: desiredRole,
+      createdAt: new Date().toISOString(),
+      progress: overallProgress,
+      milestones: [...milestones],
+      desiredRole,
+      budget,
+      companySize,
+      timeCommitment
+    };
+
+    setSavedRoadmaps(prev => {
+      const existingIndex = prev.findIndex(r => r.title === desiredRole);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = newRoadmap;
+        return updated;
+      } else {
+        return [...prev, newRoadmap];
+      }
+    });
+  };
+
+  const deleteRoadmap = (id: string) => {
+    setSavedRoadmaps(prev => prev.filter(roadmap => roadmap.id !== id));
+  };
+
+  const loadRoadmap = (id: string) => {
+    const roadmap = savedRoadmaps.find(r => r.id === id);
+    if (roadmap) {
+      setDesiredRole(roadmap.desiredRole);
+      setMilestones(roadmap.milestones);
+      setBudget(roadmap.budget || '');
+      setCompanySize(roadmap.companySize || '');
+      setTimeCommitment(roadmap.timeCommitment || '');
+      
+      const completed = roadmap.milestones.filter(m => m.completed).length;
+      setCompletedMilestones(completed);
+      
+      const upcomingSteps = roadmap.milestones
+        .flatMap(m => m.steps)
+        .filter(s => !s.completed && s.deadline);
+      
+      if (upcomingSteps.length > 0) {
+        const nextDate = new Date(upcomingSteps[0].deadline as string);
+        setNextDeadline(nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+      } else {
+        setNextDeadline('No upcoming deadlines');
+      }
+    }
+  };
 
   const swapMilestones = (indexA: number, indexB: number) => {
     setMilestones(prevMilestones => {
@@ -115,7 +216,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
             step.id === stepId ? { ...step, ...updates } : step
           );
           
-          // Recalculate milestone progress
           const completedSteps = updatedSteps.filter(step => step.completed).length;
           const totalSteps = updatedSteps.length;
           const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -131,7 +231,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
       });
     });
     
-    // Update completedMilestones count
     setMilestones(currentMilestones => {
       const completed = currentMilestones.filter(m => m.completed).length;
       setCompletedMilestones(completed);
@@ -149,7 +248,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
           };
           const updatedSteps = [...milestone.steps, newStep];
           
-          // Recalculate milestone progress
           const completedSteps = updatedSteps.filter(step => step.completed).length;
           const totalSteps = updatedSteps.length;
           const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -171,7 +269,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (milestone.id === milestoneId) {
           const updatedSteps = milestone.steps.filter(step => step.id !== stepId);
           
-          // Recalculate milestone progress
           const completedSteps = updatedSteps.filter(step => step.completed).length;
           const totalSteps = updatedSteps.length;
           const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -187,7 +284,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
       });
     });
     
-    // Update completedMilestones count
     setMilestones(currentMilestones => {
       const completed = currentMilestones.filter(m => m.completed).length;
       setCompletedMilestones(completed);
@@ -244,6 +340,11 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
         setCompletedMilestones,
         nextDeadline,
         setNextDeadline,
+        savedRoadmaps,
+        setSavedRoadmaps,
+        saveRoadmap,
+        deleteRoadmap,
+        loadRoadmap,
         swapMilestones,
         updateMilestoneStep,
         addMilestoneStep,

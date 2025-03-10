@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react';
 import FormStep from '@/components/FormStep';
 import SkillTag from '@/components/SkillTag';
 import { useRoadmap, Skill } from '@/context/RoadmapContext';
@@ -48,7 +48,8 @@ const BuildRoadmap = () => {
     timeCommitment, setTimeCommitment,
     setMilestones,
     setCompletedMilestones,
-    setNextDeadline
+    setNextDeadline,
+    saveRoadmap
   } = useRoadmap();
 
   const generateRoadmap = () => {
@@ -120,6 +121,51 @@ const BuildRoadmap = () => {
       }
     ];
 
+    if (budget) {
+      milestones.push({
+        id: '6',
+        title: 'Budget-Conscious Learning Plan',
+        description: `Optimize your learning plan within your ${budget} budget by focusing on high-ROI resources.`,
+        timeline: '1 week',
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
+      });
+    }
+
+    if (companySize) {
+      milestones.push({
+        id: '7',
+        title: `${companySize} Company Preparation`,
+        description: `Tailor your approach to match the dynamics of ${companySize} companies in your industry.`,
+        timeline: '2 weeks',
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
+      });
+    }
+
+    if (timeCommitment) {
+      milestones.push({
+        id: '8',
+        title: `${timeCommitment} Schedule Planning`,
+        description: `Organize your career transition timeline considering your ${timeCommitment.toLowerCase()} availability.`,
+        timeline: '1 week',
+        completed: false,
+        progress: 0,
+        skills: [],
+        steps: [],
+        tools: [],
+        resources: []
+      });
+    }
+
     setMilestones(milestones);
     setCompletedMilestones(0);
     
@@ -175,6 +221,14 @@ const BuildRoadmap = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors flex items-center"
+      >
+        <ChevronLeft className="h-5 w-5 mr-1" />
+        Back to Home
+      </Link>
+
       {currentStep === 1 && (
         <FormStep
           step={1}
