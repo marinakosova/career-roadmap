@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 
 export interface Skill {
@@ -98,8 +99,10 @@ interface RoadmapContextType {
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'career_roadmaps';
+const CURRENT_ROADMAP_KEY = 'current_career_roadmap';
 
 export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Form state
   const [currentRole, setCurrentRole] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
   const [experience, setExperience] = useState('');
@@ -113,11 +116,14 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [companySize, setCompanySize] = useState('');
   const [budget, setBudget] = useState('');
   const [timeCommitment, setTimeCommitment] = useState('');
+  
+  // Roadmap state
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [completedMilestones, setCompletedMilestones] = useState(0);
   const [nextDeadline, setNextDeadline] = useState('');
   const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>([]);
 
+  // Load saved roadmaps from local storage
   useEffect(() => {
     const loadSavedRoadmaps = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -134,11 +140,66 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     loadSavedRoadmaps();
   }, []);
 
+  // Load current roadmap from local storage
+  useEffect(() => {
+    const loadCurrentRoadmap = () => {
+      const currentRoadmap = localStorage.getItem(CURRENT_ROADMAP_KEY);
+      if (currentRoadmap) {
+        try {
+          const parsedData = JSON.parse(currentRoadmap);
+          setDesiredRole(parsedData.desiredRole || '');
+          setMilestones(parsedData.milestones || []);
+          setBudget(parsedData.budget || '');
+          setCompanySize(parsedData.companySize || '');
+          setTimeCommitment(parsedData.timeCommitment || '');
+          
+          // Update completed milestones count
+          const completed = (parsedData.milestones || []).filter((m: Milestone) => m.completed).length;
+          setCompletedMilestones(completed);
+          
+          // Find next deadline
+          const upcomingSteps = (parsedData.milestones || [])
+            .flatMap((m: Milestone) => m.steps)
+            .filter((s: ActionableStep) => !s.completed && s.deadline);
+          
+          if (upcomingSteps.length > 0) {
+            const sortedDeadlines = upcomingSteps.sort((a: ActionableStep, b: ActionableStep) => 
+              new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
+            );
+            const nextDate = new Date(sortedDeadlines[0].deadline as string);
+            setNextDeadline(nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+          } else {
+            setNextDeadline('No upcoming deadlines');
+          }
+        } catch (error) {
+          console.error('Error loading current roadmap:', error);
+        }
+      }
+    };
+    
+    loadCurrentRoadmap();
+  }, []);
+
+  // Save to local storage whenever savedRoadmaps changes
   useEffect(() => {
     if (savedRoadmaps.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRoadmaps));
     }
   }, [savedRoadmaps]);
+
+  // Save to local storage whenever current roadmap changes
+  useEffect(() => {
+    if (milestones.length > 0) {
+      const currentRoadmap = {
+        desiredRole,
+        milestones,
+        budget,
+        companySize,
+        timeCommitment
+      };
+      localStorage.setItem(CURRENT_ROADMAP_KEY, JSON.stringify(currentRoadmap));
+    }
+  }, [milestones, desiredRole, budget, companySize, timeCommitment]);
 
   const saveRoadmap = () => {
     if (!desiredRole.trim() || milestones.length === 0) return;
@@ -160,7 +221,7 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     setSavedRoadmaps(prev => {
-      const existingIndex = prev.findIndex(r => r.title === desiredRole);
+      const existingIndex = prev.findIndex(r => r.id === newRoadmap.id);
       if (existingIndex >= 0) {
         const updated = [...prev];
         updated[existingIndex] = newRoadmap;
@@ -192,11 +253,24 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
         .filter(s => !s.completed && s.deadline);
       
       if (upcomingSteps.length > 0) {
-        const nextDate = new Date(upcomingSteps[0].deadline as string);
+        const sortedDeadlines = upcomingSteps.sort((a, b) => 
+          new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
+        );
+        const nextDate = new Date(sortedDeadlines[0].deadline as string);
         setNextDeadline(nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
       } else {
         setNextDeadline('No upcoming deadlines');
       }
+      
+      // Save the current roadmap to local storage
+      const currentRoadmap = {
+        desiredRole: roadmap.desiredRole,
+        milestones: roadmap.milestones,
+        budget: roadmap.budget || '',
+        companySize: roadmap.companySize || '',
+        timeCommitment: roadmap.timeCommitment || ''
+      };
+      localStorage.setItem(CURRENT_ROADMAP_KEY, JSON.stringify(currentRoadmap));
     }
   };
 

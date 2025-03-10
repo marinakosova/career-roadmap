@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react';
@@ -23,6 +24,15 @@ const currentStateOptions = [
   'I\'m currently networking & interviewing'
 ];
 
+const budgetOptions = [
+  '$0 (Free resources only)',
+  '$100-500',
+  '$500-1,000',
+  '$1,000-5,000',
+  '$5,000+',
+  'Other'
+];
+
 const levels = ['Entry', 'Junior', 'Mid-level', 'Senior', 'Lead', 'Executive'];
 const industries = ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing', 'Entertainment'];
 const companySizes = ['Startup (1-10)', 'Small (11-50)', 'Medium (51-200)', 'Large (201-1000)', 'Enterprise (1000+)'];
@@ -32,6 +42,8 @@ const BuildRoadmap = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [customBudget, setCustomBudget] = useState('');
+  const [showCustomBudget, setShowCustomBudget] = useState(false);
   
   const {
     currentRole, setCurrentRole,
@@ -58,6 +70,155 @@ const BuildRoadmap = () => {
       return;
     }
 
+    // Generate actionable steps based on milestone focus
+    const generateSteps = (milestoneTitle: string) => {
+      const steps = [];
+      
+      if (milestoneTitle.includes('Skill Assessment')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Take self-assessment quizzes for key skills', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Have your skills evaluated by a mentor or peer', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Create a skills matrix chart comparing your current vs. required skills', completed: false }
+        );
+      } else if (milestoneTitle.includes('Learning Path')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Research online courses that fit your learning style', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Create a weekly learning schedule with specific goals', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Join study groups or find an accountability partner', completed: false }
+        );
+      } else if (milestoneTitle.includes('Portfolio')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Define 2-3 projects that showcase your target skills', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Set up your portfolio website or platform', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Get feedback on your portfolio from professionals', completed: false }
+        );
+      } else if (milestoneTitle.includes('Network')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Join 3-5 relevant professional groups online', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Schedule 1 informational interview per week', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Attend industry meetups or conferences', completed: false }
+        );
+      } else if (milestoneTitle.includes('Job Application')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Update resume highlighting transferable skills', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Draft a template cover letter you can customize', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Practice interview responses for common questions', completed: false }
+        );
+      } else if (milestoneTitle.includes('Budget')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'List all free resources available for your learning path', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Prioritize paid resources by ROI for your career', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Create a monthly spending plan for your career transition', completed: false }
+        );
+      } else if (milestoneTitle.includes('Company')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Research culture and workflows specific to your target company size', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Connect with professionals working at similar companies', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Tailor your approach to match expectations at your target companies', completed: false }
+        );
+      } else if (milestoneTitle.includes('Schedule')) {
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Create a realistic timeline based on your availability', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Break down learning into manageable chunks that fit your schedule', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Set up calendar reminders and time blocks for consistent progress', completed: false }
+        );
+      } else {
+        // Generic steps for any other milestone type
+        steps.push(
+          { id: `step-${Date.now()}-1`, description: 'Research best practices for this milestone', completed: false },
+          { id: `step-${Date.now()}-2`, description: 'Create an action plan with measurable outcomes', completed: false },
+          { id: `step-${Date.now()}-3`, description: 'Get feedback on your progress from mentors', completed: false }
+        );
+      }
+      
+      return steps;
+    };
+
+    // Generate milestone skills based on title and user's selected skills
+    const generateSkills = (milestoneTitle: string) => {
+      const allSkills = [...selectedSkills];
+      
+      // Add some default skills based on milestone type if user hasn't selected many
+      if (allSkills.length < 3) {
+        if (milestoneTitle.includes('Skill Assessment')) {
+          allSkills.push({ id: `skill-${Date.now()}-1`, name: 'Self-assessment' });
+          allSkills.push({ id: `skill-${Date.now()}-2`, name: 'Critical thinking' });
+        } else if (milestoneTitle.includes('Learning')) {
+          allSkills.push({ id: `skill-${Date.now()}-1`, name: 'Time management' });
+          allSkills.push({ id: `skill-${Date.now()}-2`, name: 'Self-directed learning' });
+        } else if (milestoneTitle.includes('Portfolio')) {
+          allSkills.push({ id: `skill-${Date.now()}-1`, name: 'Project management' });
+          allSkills.push({ id: `skill-${Date.now()}-2`, name: 'Documentation' });
+        }
+      }
+      
+      // Return 2-3 skills for each milestone
+      return allSkills.slice(0, Math.min(3, allSkills.length));
+    };
+
+    // Generate relevant tools based on milestone focus
+    const generateTools = (milestoneTitle: string) => {
+      const tools = [];
+      
+      if (milestoneTitle.includes('Skill Assessment')) {
+        tools.push(
+          { id: `tool-${Date.now()}-1`, name: 'LinkedIn Skill Assessments' },
+          { id: `tool-${Date.now()}-2`, name: 'Skill Radar Chart Maker' }
+        );
+      } else if (milestoneTitle.includes('Learning Path')) {
+        tools.push(
+          { id: `tool-${Date.now()}-1`, name: 'Coursera' },
+          { id: `tool-${Date.now()}-2`, name: 'Notion for scheduling' }
+        );
+      } else if (milestoneTitle.includes('Portfolio')) {
+        tools.push(
+          { id: `tool-${Date.now()}-1`, name: 'GitHub' },
+          { id: `tool-${Date.now()}-2`, name: 'Wix/WordPress' }
+        );
+      } else if (milestoneTitle.includes('Network')) {
+        tools.push(
+          { id: `tool-${Date.now()}-1`, name: 'LinkedIn' },
+          { id: `tool-${Date.now()}-2`, name: 'Meetup' }
+        );
+      } else if (milestoneTitle.includes('Job Application')) {
+        tools.push(
+          { id: `tool-${Date.now()}-1`, name: 'Resume Builder' },
+          { id: `tool-${Date.now()}-2`, name: 'LinkedIn Easy Apply' }
+        );
+      }
+      
+      return tools;
+    };
+
+    // Generate relevant resources based on milestone focus
+    const generateResources = (milestoneTitle: string) => {
+      const resources = [];
+      
+      if (milestoneTitle.includes('Skill Assessment')) {
+        resources.push(
+          { id: `resource-${Date.now()}-1`, name: 'Free skill assessment templates', url: 'https://www.linkedin.com/learning' },
+          { id: `resource-${Date.now()}-2`, name: 'Industry skill standards guide' }
+        );
+      } else if (milestoneTitle.includes('Learning Path')) {
+        resources.push(
+          { id: `resource-${Date.now()}-1`, name: 'Top courses for beginners', url: 'https://www.coursera.org' },
+          { id: `resource-${Date.now()}-2`, name: 'Learning path templates' }
+        );
+      } else if (milestoneTitle.includes('Portfolio')) {
+        resources.push(
+          { id: `resource-${Date.now()}-1`, name: 'Portfolio examples in your field', url: 'https://www.behance.net' },
+          { id: `resource-${Date.now()}-2`, name: 'Project idea generator' }
+        );
+      } else if (milestoneTitle.includes('Network')) {
+        resources.push(
+          { id: `resource-${Date.now()}-1`, name: 'Networking scripts for introverts', url: 'https://www.themuse.com/advice/networking-tips-for-introverts' },
+          { id: `resource-${Date.now()}-2`, name: 'Industry groups directory' }
+        );
+      }
+      
+      return resources;
+    };
+
     const milestones = [
       {
         id: '1',
@@ -66,10 +227,10 @@ const BuildRoadmap = () => {
         timeline: '2 weeks',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Skill Assessment'),
+        steps: generateSteps('Skill Assessment'),
+        tools: generateTools('Skill Assessment'),
+        resources: generateResources('Skill Assessment')
       },
       {
         id: '2',
@@ -78,10 +239,10 @@ const BuildRoadmap = () => {
         timeline: '1 month',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Learning Path'),
+        steps: generateSteps('Learning Path'),
+        tools: generateTools('Learning Path'),
+        resources: generateResources('Learning Path')
       },
       {
         id: '3',
@@ -90,10 +251,10 @@ const BuildRoadmap = () => {
         timeline: '3 months',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Portfolio'),
+        steps: generateSteps('Portfolio'),
+        tools: generateTools('Portfolio'),
+        resources: generateResources('Portfolio')
       },
       {
         id: '4',
@@ -102,10 +263,10 @@ const BuildRoadmap = () => {
         timeline: '2 months',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Network'),
+        steps: generateSteps('Network'),
+        tools: generateTools('Network'),
+        resources: generateResources('Network')
       },
       {
         id: '5',
@@ -114,10 +275,10 @@ const BuildRoadmap = () => {
         timeline: '1 month',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Job Application'),
+        steps: generateSteps('Job Application'),
+        tools: generateTools('Job Application'),
+        resources: generateResources('Job Application')
       }
     ];
 
@@ -129,10 +290,10 @@ const BuildRoadmap = () => {
         timeline: '1 week',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Budget'),
+        steps: generateSteps('Budget'),
+        tools: generateTools('Budget'),
+        resources: generateResources('Budget')
       });
     }
 
@@ -144,10 +305,10 @@ const BuildRoadmap = () => {
         timeline: '2 weeks',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Company'),
+        steps: generateSteps('Company'),
+        tools: generateTools('Company'),
+        resources: generateResources('Company')
       });
     }
 
@@ -159,10 +320,10 @@ const BuildRoadmap = () => {
         timeline: '1 week',
         completed: false,
         progress: 0,
-        skills: [],
-        steps: [],
-        tools: [],
-        resources: []
+        skills: generateSkills('Schedule'),
+        steps: generateSteps('Schedule'),
+        tools: generateTools('Schedule'),
+        resources: generateResources('Schedule')
       });
     }
 
@@ -172,6 +333,9 @@ const BuildRoadmap = () => {
     const deadline = new Date();
     deadline.setMonth(deadline.getMonth() + 1);
     setNextDeadline(deadline.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+
+    // Save roadmap to local storage
+    saveRoadmap();
 
     toast.success("Creating your personalized roadmap...");
     
@@ -217,6 +381,23 @@ const BuildRoadmap = () => {
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === 'Other') {
+      setShowCustomBudget(true);
+      setBudget(customBudget || '');
+    } else {
+      setShowCustomBudget(false);
+      setBudget(value);
+    }
+  };
+
+  const handleCustomBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomBudget(value);
+    setBudget(value);
   };
 
   return (
@@ -444,13 +625,26 @@ const BuildRoadmap = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="font-medium">Your budget (optional)</label>
-                <input
-                  type="text"
-                  placeholder="Enter your budget..."
-                  className="form-input"
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                />
+                <select
+                  className="form-select mb-2"
+                  value={showCustomBudget ? 'Other' : budget}
+                  onChange={handleBudgetChange}
+                >
+                  <option value="">Choose your budget</option>
+                  {budgetOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+                
+                {showCustomBudget && (
+                  <input
+                    type="text"
+                    placeholder="Enter custom budget..."
+                    className="form-input"
+                    value={customBudget}
+                    onChange={handleCustomBudgetChange}
+                  />
+                )}
               </div>
               
               <div>

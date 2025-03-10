@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, Target, Calendar, Flag, CheckCircle, CheckSquare, BookOpen, MessageSquare, Clock, Award, TrendingUp, Save } from 'lucide-react';
+import { RefreshCw, Target, Calendar, CheckSquare, Save, TrendingUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoadmap } from '@/context/RoadmapContext';
-import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import StatCard from '@/components/StatCard';
 import RoadmapChart from '@/components/RoadmapChart';
 import MilestoneCard from '@/components/MilestoneCard';
 
-// Sample market data with better labels
+// Enhanced market data with better labels
 const marketData = [
-  { name: '2022', value: 5000, label: '5,000 Jobs' },
-  { name: '2023', value: 7500, label: '7,500 Jobs' },
-  { name: '2024', value: 10000, label: '10,000 Jobs' },
-  { name: '2025', value: 14000, label: '14,000 Jobs' },
-  { name: '2026', value: 18000, label: '18,000 Jobs' },
-  { name: '2027', value: 20000, label: '20,000 Jobs' },
+  { name: '2022', value: 5000, label: '5,000 Open Positions' },
+  { name: '2023', value: 7500, label: '7,500 Open Positions' },
+  { name: '2024', value: 10000, label: '10,000 Open Positions' },
+  { name: '2025', value: 14000, label: '14,000 Open Positions' },
+  { name: '2026', value: 18000, label: '18,000 Open Positions' },
+  { name: '2027', value: 20000, label: '20,000 Open Positions' },
 ];
 
-// Sample salary data with better labels
+// Enhanced salary data with better labels
 const salaryData = [
-  { name: 'Entry', value: 50000, label: '$50,000' },
-  { name: 'Junior', value: 70000, label: '$70,000' },
-  { name: 'Mid', value: 90000, label: '$90,000' },
-  { name: 'Senior', value: 120000, label: '$120,000' },
-  { name: 'Lead', value: 150000, label: '$150,000' },
+  { name: 'Entry', value: 50000, label: '$50,000 Annual Salary' },
+  { name: 'Junior', value: 70000, label: '$70,000 Annual Salary' },
+  { name: 'Mid', value: 90000, label: '$90,000 Annual Salary' },
+  { name: 'Senior', value: 120000, label: '$120,000 Annual Salary' },
+  { name: 'Lead', value: 150000, label: '$150,000 Annual Salary' },
 ];
 
 // Sample similar roles
@@ -73,9 +72,16 @@ const Roadmap = () => {
       <div className="bg-white border-b">
         <div className="container mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <h1 className="text-3xl font-bold">
-              Your roadmap to <span className="text-primary">{desiredRole || "Your Career Goal"}</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">
+                {desiredRole || "Your Career Goal"}
+              </h1>
+              {milestones.length > 0 && (
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  {overallProgress}% complete
+                </div>
+              )}
+            </div>
             <div className="flex space-x-3">
               <button 
                 onClick={handleSaveRoadmap}
@@ -126,7 +132,7 @@ const Roadmap = () => {
             label="Total Milestones" 
           />
           <StatCard 
-            icon={CheckCircle} 
+            icon={CheckSquare} 
             value={completedMilestones} 
             label="Completed" 
           />
@@ -175,17 +181,23 @@ const Roadmap = () => {
               <RoadmapChart 
                 data={marketData} 
                 color="#9B87F5" 
-                title="Market Projection (Available Jobs)" 
+                title="Market Projection" 
                 description="Estimated number of job openings for your target role over the next 5 years"
                 height={350}
+                chartType="bar"
+                yAxisLabel="Number of Jobs"
+                xAxisLabel="Year"
               />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <RoadmapChart 
                   data={salaryData} 
                   color="#0EA5E9" 
-                  title="Salary Projection (USD/Year)" 
+                  title="Salary Projection" 
                   description="Expected salary range as you progress through different career levels"
+                  chartType="line"
+                  yAxisLabel="Annual Salary (USD)"
+                  xAxisLabel="Career Level"
                 />
                 
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -206,45 +218,6 @@ const Roadmap = () => {
           {/* Milestones Tab */}
           <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
             <div className="space-y-8">
-              {/* Overall Progress Card - Updated with subtle background */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 bg-soft-purple">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center">
-                    <TrendingUp className="h-5 w-5 text-primary mr-2" />
-                    <h3 className="text-xl font-semibold">Overall Progress</h3>
-                  </div>
-                  <div className="text-2xl font-bold text-primary">{overallProgress}%</div>
-                </div>
-                
-                <Progress value={overallProgress} className="h-3 mb-4" />
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                  <div className="flex items-center bg-white p-3 rounded-lg">
-                    <Award className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-gray-500">Milestones</div>
-                      <div className="font-semibold">{milestones.length} total</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center bg-white p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-gray-500">Completed</div>
-                      <div className="font-semibold">{completedMilestones} milestones</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center bg-white p-3 rounded-lg">
-                    <Clock className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-gray-500">Estimated Time</div>
-                      <div className="font-semibold">{milestones.length * 2} weeks</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               <div className="relative pl-8">
                 <h2 className="text-2xl font-bold mb-6">Your Career Milestones</h2>
                 
@@ -396,7 +369,7 @@ const Roadmap = () => {
             </div>
           </TabsContent>
 
-          {/* AI Chat Tab (Disabled) */}
+          {/* AI Chat Tab */}
           <TabsContent value="chat" className="pt-8 animate-fade-in-up">
             <div className="flex flex-col items-center justify-center py-12">
               <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
