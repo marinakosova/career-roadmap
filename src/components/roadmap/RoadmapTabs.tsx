@@ -9,9 +9,15 @@ interface RoadmapTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   milestones: Milestone[];
+  desiredRole?: string;
 }
 
-const RoadmapTabs: React.FC<RoadmapTabsProps> = ({ activeTab, setActiveTab, milestones }) => {
+const RoadmapTabs: React.FC<RoadmapTabsProps> = ({ 
+  activeTab, 
+  setActiveTab, 
+  milestones,
+  desiredRole 
+}) => {
   return (
     <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
       <TabsList className="w-full justify-start border-b rounded-none p-0 h-auto">

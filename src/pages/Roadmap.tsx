@@ -48,6 +48,7 @@ const Roadmap = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           milestones={milestones}
+          desiredRole={desiredRole}
         />
       </div>
     </div>

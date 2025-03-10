@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Trash2, LineChart, CheckCircle } from 'lucide-react';
@@ -29,7 +28,7 @@ const Index = () => {
       <div className="container mx-auto px-6 py-28">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900">
-            Transform Your <span className="text-primary">Career Path</span> with AI Guidance
+            Transform Your <span className="text-primary">Career Path</span> with Expert Guidance
           </h1>
           <p className="text-xl text-gray-600">
             Build a personalized roadmap that takes you from where you are to where you want to be in your career journey.
@@ -129,8 +128,8 @@ const Index = () => {
             icon={Sparkles}
           />
           <FeatureCard
-            title="Skill Gap Analysis"
-            description="Identify the skills you need to develop to reach your target role and get resources to learn them."
+            title="Market Trend Analysis"
+            description="Understand industry trends and identify which skills are in high demand to ensure your career development aligns with market needs."
             icon={LineChart}
           />
           <FeatureCard
@@ -145,4 +144,3 @@ const Index = () => {
 };
 
 export default Index;
-
