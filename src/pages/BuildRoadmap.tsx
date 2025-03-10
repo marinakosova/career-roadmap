@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import FormStep from '@/components/FormStep';
 import SkillTag from '@/components/SkillTag';
-import { useRoadmap } from '@/context/RoadmapContext';
+import { useRoadmap, Skill } from '@/context/RoadmapContext';
 import { toast } from 'sonner';
 
 const roleSkills: Record<string, string[]> = {
@@ -122,7 +122,7 @@ const BuildRoadmap = () => {
   }, [currentRole]);
 
   const toggleSkill = (skill: string) => {
-    setSelectedSkills(prev => {
+    setSelectedSkills((prev: Skill[]) => {
       const isSelected = prev.some(s => s.name === skill);
       
       if (isSelected) {
