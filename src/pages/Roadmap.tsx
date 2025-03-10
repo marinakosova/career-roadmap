@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { RefreshCw, Target, Calendar, Flag, CheckCircle, CheckSquare, BookOpen, MessageSquare, Clock, Award, TrendingUp } from 'lucide-react';
@@ -65,7 +64,7 @@ const Roadmap = () => {
         <div className="container mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h1 className="text-3xl font-bold">
-              Your roadmap to <span className="text-primary">{desiredRole}</span>
+              Your roadmap to <span className="text-primary">{desiredRole || "Your Dream Role"}</span>
             </h1>
             <Link 
               to="/build-roadmap" 
