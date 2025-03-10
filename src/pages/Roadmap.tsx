@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, Save } from 'lucide-react';
+import { RefreshCw, Save, Target } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoadmap } from '@/context/RoadmapContext';
 import { toast } from "sonner";
 import Navigation from '@/components/Navigation';
 import StatCard from '@/components/StatCard';
 import { OverviewSection, ResourcesSection } from '@/components/roadmap/RoadmapSections';
+import MilestoneCard from '@/components/MilestoneCard';
 
 const Roadmap = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -168,4 +169,3 @@ const Roadmap = () => {
 };
 
 export default Roadmap;
-

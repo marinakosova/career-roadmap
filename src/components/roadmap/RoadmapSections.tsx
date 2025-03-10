@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { BookOpen, MessageSquare, Target, Flag } from 'lucide-react';
 import RoadmapChart from '../RoadmapChart';
-import { marketData, salaryData } from '@/lib/chartData';
+import { marketData, salaryData, similarRoles } from '@/lib/chartData';
 
 export const OverviewSection = () => {
   return (
@@ -82,4 +81,3 @@ export const ResourcesSection = () => {
     </div>
   );
 };
-
