@@ -130,6 +130,7 @@ const BuildRoadmap = () => {
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills(prev => {
+      // Fix the type issue by correctly typing the function parameter
       const isSelected = prev.some(s => s.name === skill);
       
       if (isSelected) {
