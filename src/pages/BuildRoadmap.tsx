@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react';
@@ -36,7 +35,13 @@ const budgetOptions = [
 const levels = ['Entry', 'Junior', 'Mid-level', 'Senior', 'Lead', 'Executive'];
 const industries = ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing', 'Entertainment'];
 const companySizes = ['Startup (1-10)', 'Small (11-50)', 'Medium (51-200)', 'Large (201-1000)', 'Enterprise (1000+)'];
-const timeCommitments = ['Part-time', 'Full-time', 'Flexible hours', 'Contract'];
+const timeCommitments = [
+  '0-5 hours/week',
+  '5-10 hours/week',
+  '10-20 hours/week',
+  '20-30 hours/week',
+  '30+ hours/week'
+];
 
 const BuildRoadmap = () => {
   const navigate = useNavigate();
@@ -70,7 +75,6 @@ const BuildRoadmap = () => {
       return;
     }
 
-    // Generate actionable steps based on milestone focus
     const generateSteps = (milestoneTitle: string) => {
       const steps = [];
       
@@ -123,7 +127,6 @@ const BuildRoadmap = () => {
           { id: `step-${Date.now()}-3`, description: 'Set up calendar reminders and time blocks for consistent progress', completed: false }
         );
       } else {
-        // Generic steps for any other milestone type
         steps.push(
           { id: `step-${Date.now()}-1`, description: 'Research best practices for this milestone', completed: false },
           { id: `step-${Date.now()}-2`, description: 'Create an action plan with measurable outcomes', completed: false },
@@ -134,11 +137,9 @@ const BuildRoadmap = () => {
       return steps;
     };
 
-    // Generate milestone skills based on title and user's selected skills
     const generateSkills = (milestoneTitle: string) => {
       const allSkills = [...selectedSkills];
       
-      // Add some default skills based on milestone type if user hasn't selected many
       if (allSkills.length < 3) {
         if (milestoneTitle.includes('Skill Assessment')) {
           allSkills.push({ id: `skill-${Date.now()}-1`, name: 'Self-assessment' });
@@ -152,11 +153,9 @@ const BuildRoadmap = () => {
         }
       }
       
-      // Return 2-3 skills for each milestone
       return allSkills.slice(0, Math.min(3, allSkills.length));
     };
 
-    // Generate relevant tools based on milestone focus
     const generateTools = (milestoneTitle: string) => {
       const tools = [];
       
@@ -190,7 +189,6 @@ const BuildRoadmap = () => {
       return tools;
     };
 
-    // Generate relevant resources based on milestone focus
     const generateResources = (milestoneTitle: string) => {
       const resources = [];
       
@@ -334,7 +332,6 @@ const BuildRoadmap = () => {
     deadline.setMonth(deadline.getMonth() + 1);
     setNextDeadline(deadline.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
 
-    // Save roadmap to local storage
     saveRoadmap();
 
     toast.success("Creating your personalized roadmap...");
@@ -589,7 +586,7 @@ const BuildRoadmap = () => {
           step={3}
           totalSteps={3}
           title="Tell us where you want to be"
-          subtitle="Consider the ideal industry you'd like to work in and the realistic constraints that may impact your career path. Take a moment to assess your current stress level to gain awareness of your emotional state."
+          subtitle="Consider the ideal industry you'd like to work in and the realistic constraints that may impact your career path."
         >
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
