@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, Filter, X, PlusCircle, Star, TrendingUp, BookOpen } from 'lucide-react';
+import { Search, Sparkles, Filter, X, PlusCircle, CheckCircle, BookOpen, TrendingUp, Star } from 'lucide-react';
 import SkillTag from './SkillTag';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
