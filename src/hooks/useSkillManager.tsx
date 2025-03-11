@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Skill, SkillProficiency, SkillCategory } from '@/context/RoadmapContext';
 
-interface SkillManagerProps {
+interface UseSkillManagerProps {
   currentRole: string;
   suggestedSkills: Skill[];
   setSuggestedSkills: React.Dispatch<React.SetStateAction<Skill[]>>;
@@ -11,14 +11,14 @@ interface SkillManagerProps {
   roleSkills: Record<string, Array<{ name: string, category: SkillCategory }>>;
 }
 
-const SkillManager: React.FC<SkillManagerProps> = ({
+const useSkillManager = ({
   currentRole,
   suggestedSkills,
   setSuggestedSkills,
   selectedSkills,
   setSelectedSkills,
   roleSkills
-}) => {
+}: UseSkillManagerProps) => {
   useEffect(() => {
     const normalizedRole = currentRole.toLowerCase().trim();
     
@@ -78,4 +78,4 @@ const SkillManager: React.FC<SkillManagerProps> = ({
   return { toggleSkill, updateSkillProficiency };
 };
 
-export default SkillManager;
+export default useSkillManager;
