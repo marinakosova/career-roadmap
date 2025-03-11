@@ -3,9 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft, Code, Users, Building2, Brain, Briefcase, LineChart, BookOpen, TrendingUp, Star } from 'lucide-react';
 import FormStep from '@/components/FormStep';
 import SkillTag from '@/components/SkillTag';
+import SkillRecommendations from '@/components/SkillRecommendations';
+import PersonalizedLearning from '@/components/PersonalizedLearning';
 import { useRoadmap, Skill, SkillProficiency, SkillCategory } from '@/context/RoadmapContext';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 
 const skillCategories = [
@@ -119,6 +122,7 @@ const BuildRoadmap = () => {
   const [customBudget, setCustomBudget] = useState('');
   const [showCustomBudget, setShowCustomBudget] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState('skills');
   
   const {
     currentRole, setCurrentRole,
@@ -438,19 +442,19 @@ const BuildRoadmap = () => {
     }
   }, [currentRole]);
 
-  const toggleSkill = (skillName: string, category?: SkillCategory) => {
+  const toggleSkill = (skill: Skill) => {
     setSelectedSkills(prev => {
-      const existingSkill = prev.find(s => s.name === skillName);
+      const existingSkill = prev.find(s => s.name === skill.name);
       
       if (existingSkill) {
-        return prev.filter(s => s.name !== skillName);
+        return prev.filter(s => s.name !== skill.name);
       } else {
         return [...prev, { 
-          id: `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
-          name: skillName, 
+          id: skill.id || `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
+          name: skill.name, 
           selected: true,
-          category: category,
-          proficiency: undefined as SkillProficiency
+          category: skill.category,
+          proficiency: skill.proficiency || undefined as SkillProficiency
         }];
       }
     });
@@ -629,102 +633,47 @@ const BuildRoadmap = () => {
               />
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="font-medium">Skill Categories</label>
-                <p className="text-sm text-gray-500 mb-3">Filter skills by category to organize your skill inventory</p>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge 
-                    className={cn(
-                      "cursor-pointer px-3 py-1.5 hover:bg-gray-100",
-                      selectedCategory === 'all' ? "bg-primary text-white hover:bg-primary/90" : "bg-secondary"
-                    )}
-                    onClick={() => setSelectedCategory('all')}
-                  >
-                    All Categories
-                  </Badge>
-                  
-                  {skillCategories.map(category => (
-                    <Badge 
-                      key={category.id}
-                      className={cn(
-                        "cursor-pointer px-3 py-1.5 border hover:bg-opacity-80",
-                        selectedCategory === category.id ? category.color : "bg-gray-50 border-gray-200 text-gray-700"
-                      )}
-                      onClick={() => setSelectedCategory(category.id)}
+            <Tabs defaultValue="skills" value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="skills">Skill Selection</TabsTrigger>
+                <TabsTrigger value="learning">Learning Path</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="skills" className="space-y-4 pt-4">
+                <SkillRecommendations
+                  currentRole={currentRole}
+                  desiredRole={desiredRole}
+                  selectedSkills={selectedSkills}
+                  onSkillToggle={toggleSkill}
+                  onSkillProficiencyChange={updateSkillProficiency}
+                />
+              </TabsContent>
+              
+              <TabsContent value="learning" className="pt-4">
+                {selectedSkills.length > 0 ? (
+                  <PersonalizedLearning
+                    selectedSkills={selectedSkills}
+                    currentRole={currentRole}
+                    desiredRole={desiredRole}
+                  />
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                    <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-lg font-medium text-gray-700 mb-1">No skills selected yet</h3>
+                    <p className="text-gray-500 max-w-md mx-auto mb-4">
+                      Select skills from the "Skill Selection" tab to generate your personalized learning recommendations.
+                    </p>
+                    <button
+                      className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                      onClick={() => setActiveTab('skills')}
                     >
-                      <category.icon className="h-3.5 w-3.5 mr-1.5" />
-                      {category.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="font-medium">Your selected skills</label>
-                <p className="text-sm text-gray-500 mb-2">
-                  Select your proficiency level for each skill: 
-                  <span className="inline-flex items-center ml-1 text-blue-600">
-                    <BookOpen className="h-3 w-3 mr-0.5" /> want to learn
-                  </span>, 
-                  <span className="inline-flex items-center ml-1 text-amber-600">
-                    <TrendingUp className="h-3 w-3 mr-0.5" /> want to improve
-                  </span>, or 
-                  <span className="inline-flex items-center ml-1 text-green-600">
-                    <Star className="h-3 w-3 mr-0.5" /> already proficient
-                  </span>.
-                </p>
-                <div className="mt-2">
-                  {selectedSkills.length > 0 ? (
-                    <div className="flex flex-wrap">
-                      {getFilteredSkills(selectedSkills).map((skill) => (
-                        <SkillTag 
-                          key={skill.id} 
-                          name={skill.name} 
-                          selected={true} 
-                          onClick={() => toggleSkill(skill.name, skill.category)} 
-                          proficiency={skill.proficiency}
-                          category={skill.category}
-                          onProficiencyChange={(proficiency) => updateSkillProficiency(skill.name, proficiency)}
-                          showProficiency={true}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">No skills selected yet. Add skills from the suggestions below.</p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="font-medium">Suggested skills</label>
-                <div className="mt-2">
-                  <div className="flex flex-wrap">
-                    {getFilteredSkills(suggestedSkills)
-                      .filter(skill => !selectedSkills.some(s => s.name === skill.name))
-                      .map((skill) => (
-                        <div key={skill.name} className="inline-flex flex-col mr-2 mb-2">
-                          <SkillTag 
-                            name={skill.name} 
-                            selected={false}
-                            onClick={() => toggleSkill(skill.name, skill.category)} 
-                          />
-                          {skill.category && (
-                            <span className="text-xs text-gray-500 flex items-center mt-0.5 justify-center">
-                              {getCategoryIcon(skill.category)}
-                              <span className="ml-1">{skill.category}</span>
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Go to Skill Selection
+                    </button>
                   </div>
-                  {getFilteredSkills(suggestedSkills).filter(skill => !selectedSkills.some(s => s.name === skill.name)).length === 0 && (
-                    <p className="text-sm text-gray-500 italic">No more skills available in this category. Try another category or move to the next step.</p>
-                  )}
-                </div>
-              </div>
-            </div>
+                )}
+              </TabsContent>
+            </Tabs>
 
             <div>
               <label className="font-medium">Your current state (optional)</label>

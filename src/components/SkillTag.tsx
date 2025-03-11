@@ -12,6 +12,8 @@ interface SkillTagProps {
   category?: string;
   onProficiencyChange?: (proficiency: SkillProficiency) => void;
   showProficiency?: boolean;
+  recommendationScore?: number;
+  relevanceTag?: 'essential' | 'recommended' | 'optional';
 }
 
 const getProficiencyIcon = (proficiency?: SkillProficiency) => {
@@ -40,6 +42,19 @@ const getProficiencyVariant = (proficiency?: SkillProficiency) => {
   }
 };
 
+const getRelevanceColor = (relevanceTag?: 'essential' | 'recommended' | 'optional') => {
+  switch (relevanceTag) {
+    case 'essential':
+      return 'bg-rose-50 text-rose-800 border-rose-200';
+    case 'recommended':
+      return 'bg-emerald-50 text-emerald-800 border-emerald-200';
+    case 'optional':
+      return 'bg-gray-50 text-gray-800 border-gray-200';
+    default:
+      return '';
+  }
+};
+
 const SkillTag: React.FC<SkillTagProps> = ({ 
   name, 
   selected = false, 
@@ -47,7 +62,9 @@ const SkillTag: React.FC<SkillTagProps> = ({
   proficiency,
   category,
   onProficiencyChange,
-  showProficiency = false
+  showProficiency = false,
+  recommendationScore,
+  relevanceTag
 }) => {
   const handleProficiencyClick = (e: React.MouseEvent, newProficiency: SkillProficiency) => {
     e.stopPropagation();
@@ -89,6 +106,12 @@ const SkillTag: React.FC<SkillTagProps> = ({
             )}
           </span>
         )}
+        
+        {recommendationScore && (
+          <span className="ml-1.5 text-xs bg-primary/10 px-1 rounded">
+            {recommendationScore}%
+          </span>
+        )}
       </button>
       
       {selected && onProficiencyChange && (
@@ -115,6 +138,12 @@ const SkillTag: React.FC<SkillTagProps> = ({
             <Star className="h-3 w-3" />
           </button>
         </div>
+      )}
+      
+      {relevanceTag && (
+        <span className={`text-xs px-1.5 py-0.5 rounded border mt-1 mx-auto ${getRelevanceColor(relevanceTag)}`}>
+          {relevanceTag}
+        </span>
       )}
     </div>
   );
