@@ -1,10 +1,14 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
+
+export type SkillProficiency = 'want-to-learn' | 'want-to-improve' | 'proficient' | undefined;
+export type SkillCategory = 'technical' | 'soft' | 'industry' | 'domain' | 'business' | 'analytics' | undefined;
 
 export interface Skill {
   id: string;
   name: string;
   selected?: boolean;
+  proficiency?: SkillProficiency;
+  category?: SkillCategory;
 }
 
 export interface ActionableStep {
@@ -102,7 +106,6 @@ const STORAGE_KEY = 'career_roadmaps';
 const CURRENT_ROADMAP_KEY = 'current_career_roadmap';
 
 export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Form state
   const [currentRole, setCurrentRole] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
   const [experience, setExperience] = useState('');
@@ -117,13 +120,11 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [budget, setBudget] = useState('');
   const [timeCommitment, setTimeCommitment] = useState('');
   
-  // Roadmap state
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [completedMilestones, setCompletedMilestones] = useState(0);
   const [nextDeadline, setNextDeadline] = useState('');
   const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>([]);
 
-  // Load saved roadmaps from local storage
   useEffect(() => {
     const loadSavedRoadmaps = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -140,7 +141,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     loadSavedRoadmaps();
   }, []);
 
-  // Load current roadmap from local storage
   useEffect(() => {
     const loadCurrentRoadmap = () => {
       const currentRoadmap = localStorage.getItem(CURRENT_ROADMAP_KEY);
@@ -153,11 +153,9 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
           setCompanySize(parsedData.companySize || '');
           setTimeCommitment(parsedData.timeCommitment || '');
           
-          // Update completed milestones count
           const completed = (parsedData.milestones || []).filter((m: Milestone) => m.completed).length;
           setCompletedMilestones(completed);
           
-          // Find next deadline
           const upcomingSteps = (parsedData.milestones || [])
             .flatMap((m: Milestone) => m.steps)
             .filter((s: ActionableStep) => !s.completed && s.deadline);
@@ -180,14 +178,12 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     loadCurrentRoadmap();
   }, []);
 
-  // Save to local storage whenever savedRoadmaps changes
   useEffect(() => {
     if (savedRoadmaps.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRoadmaps));
     }
   }, [savedRoadmaps]);
 
-  // Save to local storage whenever current roadmap changes
   useEffect(() => {
     if (milestones.length > 0) {
       const currentRoadmap = {
@@ -262,7 +258,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
         setNextDeadline('No upcoming deadlines');
       }
       
-      // Save the current roadmap to local storage
       const currentRoadmap = {
         desiredRole: roadmap.desiredRole,
         milestones: roadmap.milestones,

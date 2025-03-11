@@ -21,6 +21,13 @@ const badgeVariants = cva(
         info: "border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200",
         purple: "border-transparent bg-purple-100 text-purple-800 hover:bg-purple-200",
         gray: "border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200",
+        rose: "border-transparent bg-rose-100 text-rose-800 hover:bg-rose-200",
+        indigo: "border-transparent bg-indigo-100 text-indigo-800 hover:bg-indigo-200",
+        emerald: "border-transparent bg-emerald-100 text-emerald-800 hover:bg-emerald-200",
+        orange: "border-transparent bg-orange-100 text-orange-800 hover:bg-orange-200",
+        yellow: "border-transparent bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+        teal: "border-transparent bg-teal-100 text-teal-800 hover:bg-teal-200",
+        cyan: "border-transparent bg-cyan-100 text-cyan-800 hover:bg-cyan-200",
       },
     },
     defaultVariants: {

@@ -1,18 +1,87 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft, Code, Users, Building2, Brain, Briefcase, LineChart } from 'lucide-react';
 import FormStep from '@/components/FormStep';
 import SkillTag from '@/components/SkillTag';
-import { useRoadmap, Skill } from '@/context/RoadmapContext';
+import { useRoadmap, Skill, SkillProficiency, SkillCategory } from '@/context/RoadmapContext';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
-const roleSkills: Record<string, string[]> = {
-  'software developer': ['JavaScript', 'React', 'Node.js', 'TypeScript', 'Git', 'API Design', 'CSS', 'HTML', 'MongoDB'],
-  'product manager': ['User Research', 'Agile', 'Roadmapping', 'Stakeholder Management', 'Data Analysis', 'UX Design', 'Market Research'],
-  'data scientist': ['Python', 'R', 'Machine Learning', 'SQL', 'Data Visualization', 'Statistical Analysis', 'Pandas', 'TensorFlow'],
-  'ux designer': ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Design Systems', 'UI Design', 'User Testing', 'Adobe XD'],
-  'marketing manager': ['SEO', 'Content Strategy', 'Social Media', 'Analytics', 'Email Marketing', 'Branding', 'Campaign Management'],
-  'project manager': ['Agile', 'Scrum', 'Budgeting', 'Risk Management', 'Stakeholder Management', 'Documentation', 'Jira'],
+const skillCategories = [
+  { id: 'technical', name: 'Technical Skills', icon: Code, color: 'bg-blue-50 border-blue-200 text-blue-700' },
+  { id: 'soft', name: 'Soft Skills', icon: Users, color: 'bg-purple-50 border-purple-200 text-purple-700' },
+  { id: 'industry', name: 'Industry Knowledge', icon: Building2, color: 'bg-amber-50 border-amber-200 text-amber-700' },
+  { id: 'domain', name: 'Domain Expertise', icon: Brain, color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
+  { id: 'business', name: 'Business Skills', icon: Briefcase, color: 'bg-rose-50 border-rose-200 text-rose-700' },
+  { id: 'analytics', name: 'Analytics', icon: LineChart, color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
+];
+
+const roleSkills: Record<string, Array<{ name: string, category: SkillCategory }>> = {
+  'software developer': [
+    { name: 'JavaScript', category: 'technical' },
+    { name: 'React', category: 'technical' },
+    { name: 'Node.js', category: 'technical' },
+    { name: 'TypeScript', category: 'technical' },
+    { name: 'Git', category: 'technical' },
+    { name: 'API Design', category: 'technical' },
+    { name: 'Problem Solving', category: 'soft' },
+    { name: 'Communication', category: 'soft' },
+    { name: 'Agile Methodology', category: 'industry' },
+    { name: 'System Design', category: 'domain' },
+  ],
+  'product manager': [
+    { name: 'User Research', category: 'domain' },
+    { name: 'Agile', category: 'industry' },
+    { name: 'Roadmapping', category: 'business' },
+    { name: 'Stakeholder Management', category: 'soft' },
+    { name: 'Data Analysis', category: 'analytics' },
+    { name: 'UX Design', category: 'domain' },
+    { name: 'Market Research', category: 'business' },
+    { name: 'Presentation', category: 'soft' },
+    { name: 'Product Strategy', category: 'business' },
+    { name: 'Competitive Analysis', category: 'industry' },
+  ],
+  'data scientist': [
+    { name: 'Python', category: 'technical' },
+    { name: 'R', category: 'technical' },
+    { name: 'Machine Learning', category: 'technical' },
+    { name: 'SQL', category: 'technical' },
+    { name: 'Data Visualization', category: 'analytics' },
+    { name: 'Statistical Analysis', category: 'analytics' },
+    { name: 'Pandas', category: 'technical' },
+    { name: 'TensorFlow', category: 'technical' },
+    { name: 'Data Storytelling', category: 'soft' },
+    { name: 'Business Intelligence', category: 'business' },
+  ],
+  'ux designer': [
+    { name: 'Figma', category: 'technical' },
+    { name: 'User Research', category: 'domain' },
+    { name: 'Wireframing', category: 'technical' },
+    { name: 'Prototyping', category: 'technical' },
+    { name: 'Design Systems', category: 'technical' },
+    { name: 'UI Design', category: 'technical' },
+    { name: 'User Testing', category: 'soft' },
+    { name: 'Adobe XD', category: 'technical' },
+  ],
+  'marketing manager': [
+    { name: 'SEO', category: 'technical' },
+    { name: 'Content Strategy', category: 'technical' },
+    { name: 'Social Media', category: 'technical' },
+    { name: 'Analytics', category: 'analytics' },
+    { name: 'Email Marketing', category: 'technical' },
+    { name: 'Branding', category: 'technical' },
+    { name: 'Campaign Management', category: 'technical' },
+  ],
+  'project manager': [
+    { name: 'Agile', category: 'technical' },
+    { name: 'Scrum', category: 'technical' },
+    { name: 'Budgeting', category: 'technical' },
+    { name: 'Risk Management', category: 'technical' },
+    { name: 'Stakeholder Management', category: 'soft' },
+    { name: 'Documentation', category: 'technical' },
+    { name: 'Jira', category: 'technical' },
+  ],
 };
 
 const currentStateOptions = [
@@ -46,9 +115,10 @@ const timeCommitments = [
 const BuildRoadmap = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [suggestedSkills, setSuggestedSkills] = useState<Array<{ name: string, category: SkillCategory }>>([]);
   const [customBudget, setCustomBudget] = useState('');
   const [showCustomBudget, setShowCustomBudget] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
   const {
     currentRole, setCurrentRole,
@@ -348,20 +418,41 @@ const BuildRoadmap = () => {
       setSuggestedSkills(roleSkills[normalizedRole]);
     } else {
       const allSkills = Object.values(roleSkills).flat();
-      const uniqueSkills = [...new Set(allSkills)];
-      setSuggestedSkills(uniqueSkills.slice(0, 10));
+      const uniqueSkillNames = [...new Set(allSkills.map(skill => skill.name))];
+      const mixedSkills = uniqueSkillNames.slice(0, 15).map(name => {
+        const originalSkill = allSkills.find(s => s.name === name);
+        return { name, category: originalSkill?.category || undefined };
+      });
+      setSuggestedSkills(mixedSkills);
     }
   }, [currentRole]);
 
-  const toggleSkill = (skill: string) => {
+  const toggleSkill = (skillName: string, category?: SkillCategory) => {
     setSelectedSkills(prev => {
-      const isSelected = prev.some(s => s.name === skill);
+      const existingSkill = prev.find(s => s.name === skillName);
       
-      if (isSelected) {
-        return prev.filter(s => s.name !== skill);
+      if (existingSkill) {
+        return prev.filter(s => s.name !== skillName);
       } else {
-        return [...prev, { id: Date.now().toString(), name: skill, selected: true }];
+        return [...prev, { 
+          id: `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
+          name: skillName, 
+          selected: true,
+          category: category,
+          proficiency: undefined
+        }];
       }
+    });
+  };
+
+  const updateSkillProficiency = (skillName: string, proficiency: SkillProficiency) => {
+    setSelectedSkills(prev => {
+      return prev.map(skill => {
+        if (skill.name === skillName) {
+          return { ...skill, proficiency };
+        }
+        return skill;
+      });
     });
   };
 
@@ -395,6 +486,19 @@ const BuildRoadmap = () => {
     const value = e.target.value;
     setCustomBudget(value);
     setBudget(value);
+  };
+
+  const getFilteredSkills = (skills: Array<{ name: string, category?: SkillCategory }>) => {
+    if (selectedCategory === 'all') return skills;
+    return skills.filter(skill => skill.category === selectedCategory);
+  };
+
+  const getCategoryIcon = (categoryId?: SkillCategory) => {
+    const category = skillCategories.find(c => c.id === categoryId);
+    if (!category) return null;
+    
+    const IconComponent = category.icon;
+    return <IconComponent className="h-4 w-4" />;
   };
 
   return (
@@ -501,7 +605,7 @@ const BuildRoadmap = () => {
           step={2}
           totalSteps={3}
           title="Tell us more about your background"
-          subtitle="The more you add, the more personalized and relevant results you'll get. Anything you can think of related to your skillset will be valuable and help to achieve better results."
+          subtitle="The more you add, the more personalized and relevant results you'll get. Add skills, set your proficiency level, and create a comprehensive skill inventory for your career path."
         >
           <div className="space-y-6">
             <div>
@@ -516,33 +620,97 @@ const BuildRoadmap = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="font-medium">Add relevant skills</label>
-                <p className="text-sm text-gray-500 mb-2">Add up to 10 skills to create a personalized roadmap that factors in your current and transferable skills.</p>
-                <div className="mt-2">
-                  {selectedSkills.map((skill) => (
-                    <SkillTag 
-                      key={skill.id} 
-                      name={skill.name} 
-                      selected={true} 
-                      onClick={() => toggleSkill(skill.name)} 
-                    />
+                <label className="font-medium">Skill Categories</label>
+                <p className="text-sm text-gray-500 mb-3">Filter skills by category to organize your skill inventory</p>
+                
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge 
+                    className={cn(
+                      "cursor-pointer px-3 py-1.5 hover:bg-gray-100",
+                      selectedCategory === 'all' ? "bg-primary text-white hover:bg-primary/90" : "bg-secondary"
+                    )}
+                    onClick={() => setSelectedCategory('all')}
+                  >
+                    All Categories
+                  </Badge>
+                  
+                  {skillCategories.map(category => (
+                    <Badge 
+                      key={category.id}
+                      className={cn(
+                        "cursor-pointer px-3 py-1.5 border hover:bg-opacity-80",
+                        selectedCategory === category.id ? category.color : "bg-gray-50 border-gray-200 text-gray-700"
+                      )}
+                      onClick={() => setSelectedCategory(category.id)}
+                    >
+                      <category.icon className="h-3.5 w-3.5 mr-1.5" />
+                      {category.name}
+                    </Badge>
                   ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="font-medium">Your selected skills</label>
+                <p className="text-sm text-gray-500 mb-2">
+                  Select your proficiency level for each skill: 
+                  <span className="inline-flex items-center ml-1 text-blue-600">
+                    <BookOpen className="h-3 w-3 mr-0.5" /> want to learn
+                  </span>, 
+                  <span className="inline-flex items-center ml-1 text-amber-600">
+                    <TrendingUp className="h-3 w-3 mr-0.5" /> want to improve
+                  </span>, or 
+                  <span className="inline-flex items-center ml-1 text-green-600">
+                    <Star className="h-3 w-3 mr-0.5" /> already proficient
+                  </span>.
+                </p>
+                <div className="mt-2">
+                  {selectedSkills.length > 0 ? (
+                    <div className="flex flex-wrap">
+                      {getFilteredSkills(selectedSkills).map((skill) => (
+                        <SkillTag 
+                          key={skill.id} 
+                          name={skill.name} 
+                          selected={true} 
+                          onClick={() => toggleSkill(skill.name, skill.category)} 
+                          proficiency={skill.proficiency}
+                          category={skill.category}
+                          onProficiencyChange={(proficiency) => updateSkillProficiency(skill.name, proficiency)}
+                          showProficiency={true}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">No skills selected yet. Add skills from the suggestions below.</p>
+                  )}
                 </div>
               </div>
 
               <div>
                 <label className="font-medium">Suggested skills</label>
                 <div className="mt-2">
-                  {suggestedSkills
-                    .filter(skill => !selectedSkills.some(s => s.name === skill))
-                    .map((skill) => (
-                      <SkillTag 
-                        key={skill} 
-                        name={skill} 
-                        selected={false}
-                        onClick={() => toggleSkill(skill)} 
-                      />
-                    ))}
+                  <div className="flex flex-wrap">
+                    {getFilteredSkills(suggestedSkills)
+                      .filter(skill => !selectedSkills.some(s => s.name === skill.name))
+                      .map((skill) => (
+                        <div key={skill.name} className="inline-flex flex-col mr-2 mb-2">
+                          <SkillTag 
+                            name={skill.name} 
+                            selected={false}
+                            onClick={() => toggleSkill(skill.name, skill.category)} 
+                          />
+                          {skill.category && (
+                            <span className="text-xs text-gray-500 flex items-center mt-0.5 justify-center">
+                              {getCategoryIcon(skill.category)}
+                              <span className="ml-1">{skill.category}</span>
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                  {getFilteredSkills(suggestedSkills).filter(skill => !selectedSkills.some(s => s.name === skill.name)).length === 0 && (
+                    <p className="text-sm text-gray-500 italic">No more skills available in this category. Try another category or move to the next step.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -683,3 +851,4 @@ const BuildRoadmap = () => {
 };
 
 export default BuildRoadmap;
+
