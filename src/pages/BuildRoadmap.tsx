@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -137,7 +138,8 @@ const BuildRoadmap = () => {
     setMilestones,
     setCompletedMilestones,
     setNextDeadline,
-    saveRoadmap
+    saveRoadmap,
+    updateSkillProficiency
   } = useRoadmap();
 
   const generateRoadmap = () => {
@@ -346,4 +348,3 @@ const BuildRoadmap = () => {
 };
 
 export default BuildRoadmap;
-

@@ -183,7 +183,7 @@ const LearningResourcesModal: React.FC<LearningResourcesModalProps> = ({
     
     // Add category-specific resources
     if (category) {
-      const categoryResources: Record<SkillCategory, Resource[]> = {
+      const categoryResources: Record<Exclude<SkillCategory, undefined>, Resource[]> = {
         technical: [
           {
             title: "Technical Skills Bootcamp",
@@ -237,12 +237,11 @@ const LearningResourcesModal: React.FC<LearningResourcesModalProps> = ({
             difficulty: "beginner",
             description: "Learn the fundamentals of data analytics and interpretation."
           }
-        ],
-        undefined: []
+        ]
       };
       
-      if (categoryResources[category]) {
-        resources = [...resources, ...categoryResources[category]];
+      if (category in categoryResources) {
+        resources = [...resources, ...categoryResources[category as Exclude<SkillCategory, undefined>]];
       }
     }
     
