@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Target } from 'lucide-react';
 import MilestoneCard from '@/components/MilestoneCard';
 import { Milestone } from '@/context/RoadmapContext';
+import { generatePersonalizedMilestones } from '@/utils/milestoneGenerator';
 
 // This maps desired roles to more specific relevant skills for each milestone phase
 const roleSpecificSkills: Record<string, string[][]> = {
@@ -147,130 +147,53 @@ const roleSpecificActionableSteps: Record<string, Record<string, string[]>> = {
 interface MilestonesSectionProps {
   milestones: Milestone[];
   desiredRole?: string;
+  currentState?: string;
+  budget?: string;
+  companySize?: string;
+  timeCommitment?: string;
+  selectedSkills?: Skill[];
 }
 
-const MilestonesSection: React.FC<MilestonesSectionProps> = ({ milestones, desiredRole }) => {
-  // Normalize the desired role for matching purposes
-  const normalizedDesiredRole = desiredRole ? desiredRole.trim() : '';
-  
-  // Find the best matching role category
-  const findBestMatchingRole = (role: string): string => {
-    if (!role) return 'default';
-    
-    const exactMatch = Object.keys(roleSpecificSkills).find(
-      key => key.toLowerCase() === role.toLowerCase()
-    );
-    
-    if (exactMatch) return exactMatch;
-    
-    // Check for partial matches
-    const partialMatch = Object.keys(roleSpecificSkills).find(
-      key => key.toLowerCase().includes(role.toLowerCase()) || 
-             role.toLowerCase().includes(key.toLowerCase())
-    );
-    
-    if (partialMatch) return partialMatch;
-    
-    // Keywords-based matching
-    if (role.toLowerCase().includes('data')) {
-      if (role.toLowerCase().includes('scien')) return 'Data Scientist';
-      if (role.toLowerCase().includes('analy')) return 'Data Analyst';
-    }
-    
-    if (role.toLowerCase().includes('develop') || role.toLowerCase().includes('engineer')) {
-      if (role.toLowerCase().includes('front')) return 'Frontend Engineer';
-      if (role.toLowerCase().includes('back')) return 'Backend Engineer';
-      return 'Software Engineer';
-    }
-    
-    if (role.toLowerCase().includes('product')) return 'Product Manager';
-    if (role.toLowerCase().includes('design')) return 'UX Designer';
-    
-    return 'default';
-  };
-  
-  const matchedRole = findBestMatchingRole(normalizedDesiredRole);
-  
-  // Add relevant, realistic skills to each milestone based on its position in the roadmap
-  const enhanceSkillsForMilestones = (milestones: Milestone[], matchedRole: string): Milestone[] => {
-    const roleSkills = roleSpecificSkills[matchedRole] || roleSpecificSkills.default;
-    const actionableSteps = roleSpecificActionableSteps[matchedRole] || roleSpecificActionableSteps.default;
-    
-    return milestones.map((milestone, index) => {
-      // Determine which skill set to use based on milestone position
-      const totalMilestones = milestones.length;
-      let careerStage: 'beginning' | 'middle' | 'advanced';
-      
-      if (index < totalMilestones / 3) {
-        careerStage = 'beginning';
-      } else if (index < (totalMilestones * 2) / 3) {
-        careerStage = 'middle';
-      } else {
-        careerStage = 'advanced';
-      }
-      
-      const skillSetIndex = Math.min(
-        Math.floor((index / totalMilestones) * roleSkills.length),
-        roleSkills.length - 1
-      );
-      
-      // Create skill objects with appropriate structure
-      const enhancedSkills = roleSkills[skillSetIndex].map(skillName => ({
-        id: `skill-${skillName.toLowerCase().replace(/\s+/g, '-')}`,
-        name: skillName
-      }));
-      
-      // Enhance the steps based on career stage
-      const steps = milestone.steps.map((step, stepIndex) => {
-        const stageSteps = actionableSteps[careerStage] || [];
-        if (stepIndex < stageSteps.length) {
-          return {
-            ...step,
-            description: stageSteps[stepIndex]
-          };
-        }
-        return step;
-      });
-      
-      // Add more personalized description
-      let enhancedDescription = milestone.description;
-      if (milestone.title.includes('Skill Assessment')) {
-        enhancedDescription = `Identify your current ${matchedRole} skills and compare them with industry requirements`;
-      } else if (milestone.title.includes('Learning Path')) {
-        enhancedDescription = `Develop a structured learning plan for acquiring essential ${matchedRole} skills`;
-      } else if (milestone.title.includes('Portfolio')) {
-        enhancedDescription = `Create demonstrable projects that showcase your ${matchedRole} expertise`;
-      }
-      
-      return {
-        ...milestone,
-        description: enhancedDescription,
-        skills: enhancedSkills,
-        steps: steps
-      };
-    });
-  };
-
-  // Get the enhanced milestones with more relevant skills and actionable steps
-  const enhancedMilestones = enhanceSkillsForMilestones(milestones, matchedRole);
+const MilestonesSection: React.FC<MilestonesSectionProps> = ({ 
+  milestones: initialMilestones,
+  desiredRole = '',
+  currentState = '',
+  budget = 'No budget',
+  companySize = 'Small to medium',
+  timeCommitment = 'Full-time',
+  selectedSkills = []
+}) => {
+  // Generate personalized milestones if we have the required information
+  const displayedMilestones = desiredRole
+    ? generatePersonalizedMilestones(
+        desiredRole,
+        currentState,
+        budget,
+        companySize,
+        timeCommitment,
+        selectedSkills
+      )
+    : initialMilestones;
 
   return (
     <div className="space-y-8">
       <div className="relative pl-8">
-        <h2 className="text-2xl font-bold mb-6">Your Career Milestones for {normalizedDesiredRole || 'Your Career'}</h2>
+        <h2 className="text-2xl font-bold mb-6">
+          Your Career Milestones for {desiredRole || 'Your Career'}
+        </h2>
         
         <div className="space-y-2">
-          {enhancedMilestones.map((milestone, index) => (
+          {displayedMilestones.map((milestone, index) => (
             <MilestoneCard 
               key={milestone.id}
               index={index}
               {...milestone}
-              isLast={index === enhancedMilestones.length - 1}
-              totalMilestones={enhancedMilestones.length}
+              isLast={index === displayedMilestones.length - 1}
+              totalMilestones={displayedMilestones.length}
             />
           ))}
           
-          {milestones.length === 0 && (
+          {displayedMilestones.length === 0 && (
             <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
               <Target className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-600">No milestones yet</h3>
