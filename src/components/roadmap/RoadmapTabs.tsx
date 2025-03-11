@@ -3,6 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OverviewSection, ResourcesSection } from '@/components/roadmap/RoadmapSections';
 import MilestonesSection from '@/components/roadmap/MilestonesSection';
+import SkillsSection from '@/components/roadmap/SkillsSection';
 import { Milestone } from '@/context/RoadmapContext';
 
 interface RoadmapTabsProps {
@@ -34,6 +35,12 @@ const RoadmapTabs: React.FC<RoadmapTabsProps> = ({
           Milestones
         </TabsTrigger>
         <TabsTrigger 
+          value="skills" 
+          className={`rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent`}
+        >
+          Skills
+        </TabsTrigger>
+        <TabsTrigger 
           value="resources" 
           className={`rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent`}
         >
@@ -47,6 +54,10 @@ const RoadmapTabs: React.FC<RoadmapTabsProps> = ({
 
       <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
         <MilestonesSection milestones={milestones} desiredRole={desiredRole} />
+      </TabsContent>
+
+      <TabsContent value="skills" className="pt-8 animate-fade-in-up">
+        <SkillsSection desiredRole={desiredRole} milestones={milestones} />
       </TabsContent>
 
       <TabsContent value="resources" className="pt-8 animate-fade-in-up">
