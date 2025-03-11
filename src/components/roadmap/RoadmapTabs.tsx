@@ -5,6 +5,7 @@ import { OverviewSection, ResourcesSection } from '@/components/roadmap/RoadmapS
 import MilestonesSection from '@/components/roadmap/MilestonesSection';
 import SkillsSection from '@/components/roadmap/SkillsSection';
 import { Milestone } from '@/context/RoadmapContext';
+import ProgressTrackerSection from '@/components/roadmap/ProgressTrackerSection';
 
 interface RoadmapTabsProps {
   activeTab: string;
@@ -41,6 +42,12 @@ const RoadmapTabs: React.FC<RoadmapTabsProps> = ({
           Skills
         </TabsTrigger>
         <TabsTrigger 
+          value="progress" 
+          className={`rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent`}
+        >
+          Progress
+        </TabsTrigger>
+        <TabsTrigger 
           value="resources" 
           className={`rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent`}
         >
@@ -58,6 +65,10 @@ const RoadmapTabs: React.FC<RoadmapTabsProps> = ({
 
       <TabsContent value="skills" className="pt-8 animate-fade-in-up">
         <SkillsSection desiredRole={desiredRole} milestones={milestones} />
+      </TabsContent>
+
+      <TabsContent value="progress" className="pt-8 animate-fade-in-up">
+        <ProgressTrackerSection milestones={milestones} />
       </TabsContent>
 
       <TabsContent value="resources" className="pt-8 animate-fade-in-up">
