@@ -46,57 +46,10 @@ const ProgressTrackerSection: React.FC<ProgressTrackerSectionProps> = ({
       })
       .slice(0, 3);
     
-    // Calculate streak based on completed tasks
-    // If we have no completed tasks or steps, streak is 0
-    let streak = 0;
-    
-    if (completedSteps > 0) {
-      // Get the completed steps with completion dates
-      const completedWithDates = allSteps
-        .filter(step => step.completed && step.completedDate)
-        .map(step => ({
-          ...step,
-          completedDate: step.completedDate ? new Date(step.completedDate) : new Date()
-        }))
-        .sort((a, b) => b.completedDate.getTime() - a.completedDate.getTime());
-      
-      if (completedWithDates.length > 0) {
-        // Check if there's at least one task completed today
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const mostRecentDate = completedWithDates[0].completedDate;
-        mostRecentDate.setHours(0, 0, 0, 0);
-        
-        const daysDifference = Math.floor((today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        // If completed today or yesterday, start counting streak
-        if (daysDifference <= 1) {
-          streak = 1;
-          
-          // Count back through previous days
-          let currentDate = new Date(today);
-          currentDate.setDate(currentDate.getDate() - 1);
-          
-          let streakContinues = true;
-          
-          while (streakContinues) {
-            const tasksCompletedOnDate = completedWithDates.filter(task => {
-              const taskDate = new Date(task.completedDate);
-              taskDate.setHours(0, 0, 0, 0);
-              return taskDate.getTime() === currentDate.getTime();
-            });
-            
-            if (tasksCompletedOnDate.length > 0) {
-              streak++;
-              currentDate.setDate(currentDate.getDate() - 1);
-            } else {
-              streakContinues = false;
-            }
-          }
-        }
-      }
-    }
+    // For now, set streak to 0 since we don't have completedDate information
+    // In a real application, we would need to add completedDate to the ActionableStep type
+    // and update it whenever a step is marked as completed
+    const streak = 0;
     
     return {
       totalSteps,
