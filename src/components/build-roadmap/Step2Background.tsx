@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Upload, Edit } from 'lucide-react';
 import SkillRecommendations from '@/components/SkillRecommendations';
+import { Button } from '@/components/ui/button';
 import { Skill, SkillProficiency, useRoadmap } from '@/context/RoadmapContext';
+import { toast } from 'sonner';
 
 interface Step2Props {
   background: string;
@@ -33,13 +35,43 @@ const Step2Background: React.FC<Step2Props> = ({
   prevStep,
   nextStep
 }) => {
+  const handleResumeUpload = () => {
+    toast.info("Resume upload feature coming soon in the full version");
+  };
+
+  const handleManualAdd = () => {
+    toast.info("Manual entry feature coming soon in the full version");
+  };
+
   return (
     <div className="space-y-6">
+      <div className="space-y-2">
+        <label className="font-medium block mb-2">Add your work history</label>
+        <div className="flex gap-3 mb-4">
+          <Button 
+            onClick={handleResumeUpload} 
+            className="flex-1 flex items-center justify-center gap-2"
+            variant="outline"
+          >
+            <Upload className="h-4 w-4" />
+            Upload Resume
+          </Button>
+          <Button 
+            onClick={handleManualAdd} 
+            className="flex-1 flex items-center justify-center gap-2"
+            variant="outline"
+          >
+            <Edit className="h-4 w-4" />
+            Add Manually
+          </Button>
+        </div>
+      </div>
+
       <div>
-        <label className="font-medium">Describe your professional background and qualifications</label>
+        <label className="font-medium">Additional certifications or qualifications</label>
         <textarea
           className="form-input min-h-32"
-          placeholder="List your relevant work history, education, certifications, and projects that showcase your expertise..."
+          placeholder="List any certifications, courses, or other qualifications that may not be on your resume..."
           value={background}
           onChange={(e) => setBackground(e.target.value)}
         />
