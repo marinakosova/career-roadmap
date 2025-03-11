@@ -8,6 +8,7 @@ import Step1BasicInfo from '@/components/build-roadmap/Step1BasicInfo';
 import Step2Background from '@/components/build-roadmap/Step2Background';
 import Step3Preferences from '@/components/build-roadmap/Step3Preferences';
 import { generateRoadmapMilestones } from '@/utils/roadmapGenerator';
+import { getRecommendedSkills } from '@/utils/skillsRecommendation';
 
 const skillCategories = [
   { id: 'technical', name: 'Technical Skills', icon: 'code', color: 'bg-blue-50 border-blue-200 text-blue-700' },
@@ -116,7 +117,7 @@ const timeCommitments = [
 const BuildRoadmap = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [suggestedSkills, setSuggestedSkills] = useState<Skill[]>([]);
+  const [suggestedSkills, setSuggestedSkills] = useState<Array<Skill & { relevance?: string; score?: number }>>([]);
   const [customBudget, setCustomBudget] = useState('');
   const [showCustomBudget, setShowCustomBudget] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -166,31 +167,13 @@ const BuildRoadmap = () => {
   };
 
   useEffect(() => {
-    const normalizedRole = currentRole.toLowerCase().trim();
-    
-    if (normalizedRole && roleSkills[normalizedRole]) {
-      const skills = roleSkills[normalizedRole].map(skill => ({
-        id: `suggested-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        name: skill.name,
-        category: skill.category,
-        proficiency: undefined as SkillProficiency
-      }));
-      setSuggestedSkills(skills);
+    if (currentRole && desiredRole) {
+      const recommendations = getRecommendedSkills(currentRole, desiredRole);
+      setSuggestedSkills(recommendations);
     } else {
-      const allSkills = Object.values(roleSkills).flat();
-      const uniqueSkillNames = [...new Set(allSkills.map(skill => skill.name))];
-      const mixedSkills = uniqueSkillNames.slice(0, 15).map(name => {
-        const originalSkill = allSkills.find(s => s.name === name);
-        return { 
-          id: `suggested-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name,
-          category: originalSkill?.category || undefined,
-          proficiency: undefined as SkillProficiency
-        };
-      });
-      setSuggestedSkills(mixedSkills);
+      setSuggestedSkills([]);
     }
-  }, [currentRole]);
+  }, [currentRole, desiredRole]);
 
   const toggleSkill = (skill: Skill) => {
     setSelectedSkills(prev => {
