@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -208,17 +207,6 @@ const BuildRoadmap = () => {
           proficiency: skill.proficiency || undefined as SkillProficiency
         }];
       }
-    });
-  };
-
-  const updateSkillProficiency = (skillName: string, proficiency: SkillProficiency) => {
-    setSelectedSkills(prev => {
-      return prev.map(skill => {
-        if (skill.name === skillName) {
-          return { ...skill, proficiency };
-        }
-        return skill;
-      });
     });
   };
 
