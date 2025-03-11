@@ -15,11 +15,3 @@ export const salaryData = [
   { name: 'Senior', value: 120000, label: '$120,000 Annual Salary' },
   { name: 'Lead', value: 150000, label: '$150,000 Annual Salary' },
 ];
-
-export const similarRoles = [
-  'Product Owner', 
-  'Technical Product Manager', 
-  'UX Product Manager', 
-  'Digital Product Manager',
-  'Product Marketing Manager'
-];

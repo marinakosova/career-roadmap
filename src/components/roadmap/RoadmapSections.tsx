@@ -2,9 +2,42 @@
 import React from 'react';
 import { BookOpen, MessageSquare, Target, Flag } from 'lucide-react';
 import RoadmapChart from '../RoadmapChart';
-import { marketData, salaryData, similarRoles } from '@/lib/chartData';
+import { marketData, salaryData } from '@/lib/chartData';
 
-export const OverviewSection = () => {
+// A mapping of roles to similar roles
+const similarRolesMap: Record<string, string[]> = {
+  'Product Manager': ['Product Owner', 'Technical Product Manager', 'UX Product Manager', 'Digital Product Manager', 'Product Marketing Manager'],
+  'Software Engineer': ['Frontend Developer', 'Backend Engineer', 'Full Stack Developer', 'DevOps Engineer', 'Mobile Developer'],
+  'Data Scientist': ['Data Analyst', 'Machine Learning Engineer', 'AI Researcher', 'Quantitative Analyst', 'Business Intelligence Analyst'],
+  'UX Designer': ['UI Designer', 'Product Designer', 'Interaction Designer', 'User Researcher', 'Information Architect'],
+  'Marketing Manager': ['Brand Manager', 'Digital Marketing Manager', 'Content Marketing Manager', 'Growth Marketer', 'SEO Specialist']
+  // Add more role mappings as needed
+};
+
+// Default roles if desired role is not in the mapping
+const defaultSimilarRoles = ['Related Role 1', 'Related Role 2', 'Related Role 3', 'Related Role 4', 'Related Role 5'];
+
+export const OverviewSection = ({ desiredRole }: { desiredRole?: string }) => {
+  // Get similar roles based on the desired role
+  const getSimilarRoles = () => {
+    if (!desiredRole) return defaultSimilarRoles;
+    
+    // Try to find exact match
+    if (similarRolesMap[desiredRole]) {
+      return similarRolesMap[desiredRole];
+    }
+    
+    // Try to find partial match
+    const partialMatch = Object.keys(similarRolesMap).find(role => 
+      desiredRole.toLowerCase().includes(role.toLowerCase()) || 
+      role.toLowerCase().includes(desiredRole.toLowerCase())
+    );
+    
+    return partialMatch ? similarRolesMap[partialMatch] : defaultSimilarRoles;
+  };
+  
+  const displayedSimilarRoles = getSimilarRoles();
+
   return (
     <div className="space-y-8">
       <RoadmapChart 
@@ -30,9 +63,9 @@ export const OverviewSection = () => {
         />
         
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold mb-4">Similar Roles</h3>
+          <h3 className="text-lg font-semibold mb-4">Similar Roles to {desiredRole || "Your Desired Role"}</h3>
           <ul className="space-y-3">
-            {similarRoles.map((role, index) => (
+            {displayedSimilarRoles.map((role, index) => (
               <li key={index} className="flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="h-2 w-2 rounded-full bg-primary mr-3"></div>
                 <span>{role}</span>

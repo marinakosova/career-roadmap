@@ -56,7 +56,7 @@ const RoadmapTabs: React.FC<RoadmapTabsProps> = ({
         </TabsList>
 
         <TabsContent value="overview" className="pt-8 animate-fade-in-up">
-          <OverviewSection />
+          <OverviewSection desiredRole={desiredRole} />
         </TabsContent>
 
         <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
