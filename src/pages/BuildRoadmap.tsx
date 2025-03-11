@@ -624,10 +624,10 @@ const BuildRoadmap = () => {
         >
           <div className="space-y-6">
             <div>
-              <label className="font-medium">Tell us more about your experience, include relevant education and certificates</label>
+              <label className="font-medium">Describe your professional background and qualifications</label>
               <textarea
                 className="form-input min-h-32"
-                placeholder="Share your background..."
+                placeholder="List your relevant work history, education, certifications, and projects that showcase your expertise..."
                 value={background}
                 onChange={(e) => setBackground(e.target.value)}
               />
