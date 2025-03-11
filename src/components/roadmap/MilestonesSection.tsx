@@ -4,27 +4,26 @@ import { Target } from 'lucide-react';
 import MilestoneCard from '@/components/MilestoneCard';
 import { Milestone, Skill } from '@/context/types';
 import { generatePersonalizedMilestones } from '@/utils/milestoneGenerator';
+import { useRoadmap } from '@/context/RoadmapContext';
 
 interface MilestonesSectionProps {
   milestones: Milestone[];
   desiredRole?: string;
-  currentState?: string;
-  budget?: string;
-  companySize?: string;
-  timeCommitment?: string;
-  selectedSkills?: Skill[];
 }
 
 const MilestonesSection: React.FC<MilestonesSectionProps> = ({ 
   milestones: initialMilestones,
-  desiredRole = '',
-  currentState = '',
-  budget = 'No budget',
-  companySize = 'Small to medium',
-  timeCommitment = 'Full-time',
-  selectedSkills = []
+  desiredRole = ''
 }) => {
-  // Generate personalized milestones if we have the required information
+  const {
+    currentState,
+    budget,
+    companySize,
+    timeCommitment,
+    selectedSkills
+  } = useRoadmap();
+
+  // Generate personalized milestones using all available context
   const displayedMilestones = desiredRole
     ? generatePersonalizedMilestones(
         desiredRole,

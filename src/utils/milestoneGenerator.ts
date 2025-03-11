@@ -24,8 +24,8 @@ export const generatePersonalizedMilestones = (
   // Normalize the role for case-insensitive matching
   const normalizedRole = desiredRole.toLowerCase();
   
-  // Find matching role or use default
-  let baseMilestones;
+  // Find matching role milestones or use default
+  let baseMilestones = defaultMilestones;
   for (const [role, milestones] of Object.entries(roleSpecificMilestones)) {
     if (normalizedRole.includes(role)) {
       baseMilestones = milestones;
@@ -33,12 +33,7 @@ export const generatePersonalizedMilestones = (
     }
   }
   
-  // If no matching role found, use default milestones
-  if (!baseMilestones) {
-    baseMilestones = defaultMilestones;
-  }
-  
-  // Adjust timelines based on time commitment
+  // Get time commitment multiplier
   const timelineMultiplier = timelineAdjustments[timeCommitment] || 1;
   
   // Get company size specific adjustments
@@ -55,22 +50,16 @@ export const generatePersonalizedMilestones = (
   
   // Transform base milestones into personalized ones
   const personalizedMilestones = baseMilestones.map((base, index) => {
-    // Adjust timeline
+    // Adjust timeline based on commitment
     const timelineParts = base.timeline.split(' ');
     const duration = parseInt(timelineParts[0]) * timelineMultiplier;
     const unit = timelineParts[1];
     
-    // Enhance description based on company size
+    // Enhance description with company size focus
     let enhancedDescription = base.description;
-    if (sizeAdjustments) {
+    if (sizeAdjustments?.focus) {
       enhancedDescription += ` with focus on ${sizeAdjustments.focus.join(', ')}`;
     }
-    
-    // Combine resources from role-specific and budget-based
-    const combinedResources = [
-      ...(base.resources || []),
-      ...budgetResources
-    ];
     
     // Create milestone with all enhancements
     const milestone: Milestone = {
@@ -83,7 +72,10 @@ export const generatePersonalizedMilestones = (
       skills: distributedSkills[index] || [],
       steps: createStepsFromArray(base.steps),
       tools: createToolsFromArray(base.tools),
-      resources: createResourcesFromArray(combinedResources)
+      resources: createResourcesFromArray([
+        ...(base.resources || []),
+        ...budgetResources
+      ])
     };
     
     return milestone;
@@ -92,13 +84,8 @@ export const generatePersonalizedMilestones = (
   // Add state-specific milestones if available
   let finalMilestones = [...personalizedMilestones];
   
-  if (stateAdjustments) {
-    const stateSpecificMilestones = stateAdjustments.priority.map((priority, index) => {
-      // Distribute remaining skills to state-specific milestones
-      const stateSkills = selectedSkills.length > 0 
-        ? selectedSkills.slice(0, Math.min(2, selectedSkills.length)) 
-        : [];
-      
+  if (stateAdjustments?.priority) {
+    const stateSpecificMilestones = stateAdjustments.priority.map((priority) => {
       const additionalMilestone: Milestone = {
         id: generateId(),
         title: `${priority.charAt(0).toUpperCase() + priority.slice(1)}`,
@@ -106,7 +93,7 @@ export const generatePersonalizedMilestones = (
         timeline: '2 weeks',
         completed: false,
         progress: 0,
-        skills: stateSkills,
+        skills: selectedSkills.slice(0, 2), // Add up to 2 relevant skills
         steps: createStepsFromArray([
           `Research ${priority} opportunities`,
           `Create a ${priority} plan`,
