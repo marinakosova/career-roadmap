@@ -1,4 +1,3 @@
-
 import { DetailedResource } from '../resourceUtilities';
 
 /**
@@ -7,7 +6,7 @@ import { DetailedResource } from '../resourceUtilities';
 export const uxDesignerResources: Record<string, DetailedResource[]> = {
   'ux_foundations': [
     {
-      name: 'Don't Make Me Think',
+      name: 'Don\'t Make Me Think',
       url: 'https://www.amazon.com/Dont-Make-Think-Revisited-Usability/dp/0321965515/',
       type: 'book',
       isPaid: true,
