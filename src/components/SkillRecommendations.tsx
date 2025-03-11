@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Sparkles, Filter, X, PlusCircle, CheckCircle, BookOpen, TrendingUp, Star } from 'lucide-react';
 import SkillTag from './SkillTag';
@@ -31,6 +30,48 @@ const industrySkillsData: Record<string, Array<{name: string, category: SkillCat
     { name: 'Cloud Services', category: 'technical', relevance: 'recommended', score: 83 },
     { name: 'Mentoring', category: 'soft', relevance: 'optional', score: 75 },
     { name: 'Technical Writing', category: 'soft', relevance: 'optional', score: 70 },
+  ],
+  'frontend developer': [
+    { name: 'JavaScript', category: 'technical', relevance: 'essential', score: 95 },
+    { name: 'HTML/CSS', category: 'technical', relevance: 'essential', score: 94 },
+    { name: 'React', category: 'technical', relevance: 'essential', score: 92 },
+    { name: 'Responsive Design', category: 'technical', relevance: 'essential', score: 90 },
+    { name: 'TypeScript', category: 'technical', relevance: 'recommended', score: 88 },
+    { name: 'CSS Frameworks', category: 'technical', relevance: 'recommended', score: 85 },
+    { name: 'Web Performance', category: 'technical', relevance: 'recommended', score: 82 },
+    { name: 'Git', category: 'technical', relevance: 'essential', score: 89 },
+    { name: 'UI/UX Principles', category: 'domain', relevance: 'recommended', score: 84 },
+    { name: 'Testing Libraries', category: 'technical', relevance: 'recommended', score: 80 },
+    { name: 'Browser DevTools', category: 'technical', relevance: 'essential', score: 86 },
+    { name: 'Accessibility', category: 'domain', relevance: 'recommended', score: 83 },
+  ],
+  'frontend engineer': [
+    { name: 'JavaScript', category: 'technical', relevance: 'essential', score: 95 },
+    { name: 'HTML/CSS', category: 'technical', relevance: 'essential', score: 94 },
+    { name: 'React', category: 'technical', relevance: 'essential', score: 93 },
+    { name: 'TypeScript', category: 'technical', relevance: 'essential', score: 92 },
+    { name: 'Web Performance', category: 'technical', relevance: 'essential', score: 90 },
+    { name: 'Testing Libraries', category: 'technical', relevance: 'essential', score: 88 },
+    { name: 'Responsive Design', category: 'technical', relevance: 'essential', score: 91 },
+    { name: 'UI Architecture', category: 'technical', relevance: 'recommended', score: 87 },
+    { name: 'CI/CD', category: 'technical', relevance: 'recommended', score: 85 },
+    { name: 'Design Systems', category: 'domain', relevance: 'recommended', score: 86 },
+    { name: 'Accessibility', category: 'domain', relevance: 'essential', score: 89 },
+    { name: 'Browser APIs', category: 'technical', relevance: 'recommended', score: 84 },
+  ],
+  'graphic design': [
+    { name: 'Adobe Photoshop', category: 'technical', relevance: 'essential', score: 95 },
+    { name: 'Adobe Illustrator', category: 'technical', relevance: 'essential', score: 94 },
+    { name: 'Typography', category: 'domain', relevance: 'essential', score: 93 },
+    { name: 'Color Theory', category: 'domain', relevance: 'essential', score: 92 },
+    { name: 'Layout Design', category: 'domain', relevance: 'essential', score: 91 },
+    { name: 'Branding', category: 'domain', relevance: 'recommended', score: 88 },
+    { name: 'Print Design', category: 'domain', relevance: 'recommended', score: 85 },
+    { name: 'Digital Design', category: 'domain', relevance: 'recommended', score: 87 },
+    { name: 'UI Design', category: 'domain', relevance: 'recommended', score: 84 },
+    { name: 'Adobe InDesign', category: 'technical', relevance: 'essential', score: 90 },
+    { name: 'Client Communication', category: 'soft', relevance: 'recommended', score: 86 },
+    { name: 'Design Thinking', category: 'soft', relevance: 'recommended', score: 83 },
   ],
   'product manager': [
     { name: 'Product Analytics', category: 'analytics', relevance: 'essential', score: 95 },
@@ -76,85 +117,77 @@ const industrySkillsData: Record<string, Array<{name: string, category: SkillCat
   ]
 };
 
-// More comprehensive dataset for all skills
-const allSkillsDataset: Array<{name: string, category: SkillCategory}> = [
-  // Technical Skills
-  { name: 'JavaScript', category: 'technical' },
-  { name: 'Python', category: 'technical' },
-  { name: 'React', category: 'technical' },
-  { name: 'Node.js', category: 'technical' },
-  { name: 'Java', category: 'technical' },
-  { name: 'SQL', category: 'technical' },
-  { name: 'GraphQL', category: 'technical' },
-  { name: 'Docker', category: 'technical' },
-  { name: 'Kubernetes', category: 'technical' },
-  { name: 'AWS', category: 'technical' },
-  { name: 'Azure', category: 'technical' },
-  { name: 'Google Cloud', category: 'technical' },
-  { name: 'TypeScript', category: 'technical' },
-  { name: 'C#', category: 'technical' },
-  { name: 'PHP', category: 'technical' },
-  { name: 'Ruby', category: 'technical' },
-  { name: 'Swift', category: 'technical' },
-  { name: 'Kotlin', category: 'technical' },
-  { name: 'Vue.js', category: 'technical' },
-  { name: 'Angular', category: 'technical' },
-  { name: 'MongoDB', category: 'technical' },
-  { name: 'PostgreSQL', category: 'technical' },
-  
-  // Soft Skills
-  { name: 'Communication', category: 'soft' },
-  { name: 'Leadership', category: 'soft' },
-  { name: 'Team Collaboration', category: 'soft' },
-  { name: 'Problem Solving', category: 'soft' },
-  { name: 'Time Management', category: 'soft' },
-  { name: 'Critical Thinking', category: 'soft' },
-  { name: 'Adaptability', category: 'soft' },
-  { name: 'Creativity', category: 'soft' },
-  { name: 'Conflict Resolution', category: 'soft' },
-  { name: 'Emotional Intelligence', category: 'soft' },
-  { name: 'Public Speaking', category: 'soft' },
-  { name: 'Negotiation', category: 'soft' },
-  
-  // Business Skills
-  { name: 'Project Management', category: 'business' },
-  { name: 'Strategic Planning', category: 'business' },
-  { name: 'Budget Management', category: 'business' },
-  { name: 'Marketing', category: 'business' },
-  { name: 'Sales', category: 'business' },
-  { name: 'Customer Service', category: 'business' },
-  { name: 'Business Analysis', category: 'business' },
-  { name: 'Risk Management', category: 'business' },
-  { name: 'Contract Management', category: 'business' },
-  { name: 'Stakeholder Management', category: 'business' },
-  
-  // Analytics Skills
-  { name: 'Data Analysis', category: 'analytics' },
-  { name: 'Data Visualization', category: 'analytics' },
-  { name: 'Business Intelligence', category: 'analytics' },
-  { name: 'A/B Testing', category: 'analytics' },
-  { name: 'Statistical Analysis', category: 'analytics' },
-  { name: 'Google Analytics', category: 'analytics' },
-  { name: 'Market Research', category: 'analytics' },
-  { name: 'Predictive Analytics', category: 'analytics' },
-  { name: 'Data Mining', category: 'analytics' },
-  
-  // Domain Expertise
-  { name: 'Agile Methodology', category: 'domain' },
-  { name: 'Scrum', category: 'domain' },
-  { name: 'DevOps', category: 'domain' },
-  { name: 'UX Design', category: 'domain' },
-  { name: 'UI Design', category: 'domain' },
-  { name: 'Product Management', category: 'domain' },
-  { name: 'Content Strategy', category: 'domain' },
-  { name: 'SEO', category: 'domain' },
-  { name: 'Cybersecurity', category: 'domain' },
-  { name: 'Blockchain', category: 'domain' },
-  { name: 'Machine Learning', category: 'domain' },
-  { name: 'Artificial Intelligence', category: 'domain' },
-  { name: 'IoT', category: 'domain' },
-  { name: 'AR/VR', category: 'domain' },
-];
+// More focused dataset for common skills by category
+const categorizedSkillsDataset: Record<SkillCategory, Array<{name: string, category: SkillCategory}>> = {
+  'technical': [
+    { name: 'JavaScript', category: 'technical' },
+    { name: 'Python', category: 'technical' },
+    { name: 'React', category: 'technical' },
+    { name: 'Node.js', category: 'technical' },
+    { name: 'SQL', category: 'technical' },
+    { name: 'TypeScript', category: 'technical' },
+    { name: 'Git', category: 'technical' },
+    { name: 'Java', category: 'technical' },
+    { name: 'Docker', category: 'technical' },
+    { name: 'AWS', category: 'technical' },
+  ],
+  'soft': [
+    { name: 'Communication', category: 'soft' },
+    { name: 'Leadership', category: 'soft' },
+    { name: 'Team Collaboration', category: 'soft' },
+    { name: 'Problem Solving', category: 'soft' },
+    { name: 'Time Management', category: 'soft' },
+    { name: 'Critical Thinking', category: 'soft' },
+    { name: 'Adaptability', category: 'soft' },
+    { name: 'Emotional Intelligence', category: 'soft' },
+    { name: 'Negotiation', category: 'soft' },
+    { name: 'Public Speaking', category: 'soft' },
+  ],
+  'business': [
+    { name: 'Project Management', category: 'business' },
+    { name: 'Strategic Planning', category: 'business' },
+    { name: 'Budget Management', category: 'business' },
+    { name: 'Marketing', category: 'business' },
+    { name: 'Sales', category: 'business' },
+    { name: 'Business Analysis', category: 'business' },
+    { name: 'Risk Management', category: 'business' },
+    { name: 'Stakeholder Management', category: 'business' },
+    { name: 'Product Strategy', category: 'business' },
+    { name: 'Customer Service', category: 'business' },
+  ],
+  'analytics': [
+    { name: 'Data Analysis', category: 'analytics' },
+    { name: 'Data Visualization', category: 'analytics' },
+    { name: 'Business Intelligence', category: 'analytics' },
+    { name: 'A/B Testing', category: 'analytics' },
+    { name: 'Statistical Analysis', category: 'analytics' },
+    { name: 'Market Research', category: 'analytics' },
+    { name: 'Google Analytics', category: 'analytics' },
+    { name: 'Predictive Analytics', category: 'analytics' },
+    { name: 'Data Mining', category: 'analytics' },
+    { name: 'Tableau', category: 'analytics' },
+  ],
+  'domain': [
+    { name: 'Agile Methodology', category: 'domain' },
+    { name: 'Scrum', category: 'domain' },
+    { name: 'DevOps', category: 'domain' },
+    { name: 'UX Design', category: 'domain' },
+    { name: 'UI Design', category: 'domain' },
+    { name: 'Product Management', category: 'domain' },
+    { name: 'Content Strategy', category: 'domain' },
+    { name: 'SEO', category: 'domain' },
+    { name: 'Cybersecurity', category: 'domain' },
+    { name: 'Blockchain', category: 'domain' },
+    { name: 'Machine Learning', category: 'domain' },
+    { name: 'Artificial Intelligence', category: 'domain' },
+  ],
+  'undefined': [
+    { name: 'Industry Knowledge', category: undefined },
+    { name: 'Academic Research', category: undefined },
+    { name: 'Teaching', category: undefined },
+    { name: 'Mentoring', category: undefined },
+  ]
+};
 
 interface SkillRecommendationsProps {
   currentRole: string;
@@ -175,6 +208,7 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
   const [filter, setFilter] = useState<string>('all');
   const [filteredSkills, setFilteredSkills] = useState<Array<{name: string, category: SkillCategory, relevance?: 'essential' | 'recommended' | 'optional', score?: number}>>([]);
   const [recommendedSkills, setRecommendedSkills] = useState<Array<{name: string, category: SkillCategory, relevance: 'essential' | 'recommended' | 'optional', score: number}>>([]);
+  const [showAllSkills, setShowAllSkills] = useState(false);
   
   // Categories for filtering
   const skillCategories = [
@@ -190,23 +224,35 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
     { id: 'optional', name: 'Optional Skills' },
   ];
 
+  // Helper function to normalize role names
+  const normalizeRoleName = (role: string): string => {
+    return role.toLowerCase().trim();
+  };
+
   // Generate skill recommendations based on desired role
   useEffect(() => {
     if (!desiredRole) return;
     
-    const normalizedRole = desiredRole.toLowerCase().trim();
+    const normalizedRole = normalizeRoleName(desiredRole);
     let recommendations: Array<{name: string, category: SkillCategory, relevance: 'essential' | 'recommended' | 'optional', score: number}> = [];
     
-    // Get specific role recommendations if available
-    for (const [role, skills] of Object.entries(industrySkillsData)) {
-      if (normalizedRole.includes(role)) {
-        recommendations = [...recommendations, ...skills];
+    // Check for exact match
+    if (industrySkillsData[normalizedRole]) {
+      recommendations = industrySkillsData[normalizedRole];
+    } else {
+      // Try to find similar roles
+      for (const [role, skills] of Object.entries(industrySkillsData)) {
+        // Check if the normalized desired role contains this role key or vice versa
+        if (normalizedRole.includes(role) || role.includes(normalizedRole)) {
+          recommendations = [...recommendations, ...skills];
+          break; // Found a match, no need to continue
+        }
       }
     }
     
-    // If we don't have enough recommendations, add some general ones
-    if (recommendations.length < 5) {
-      // Just use a default set for now
+    // If we still don't have recommendations, use a default
+    if (recommendations.length === 0) {
+      // Try software developer as a fallback
       recommendations = industrySkillsData['software developer'];
     }
     
@@ -221,12 +267,18 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
     
     setRecommendedSkills(recommendations);
     
-    // Set initial filtered skills
-    const initialFiltered = [...recommendations, ...allSkillsDataset];
+    // Generate a smaller set of relevant skills for initial display
+    const relevantCategories: SkillCategory[] = ['technical', 'soft', 'domain', 'business', 'analytics'];
+    const initialFilteredSkills = relevantCategories.flatMap(category => 
+      categorizedSkillsDataset[category].slice(0, 5)
+    );
+    
+    // Add recommendations to filtered skills
+    const allFilteredSkills = [...recommendations, ...initialFilteredSkills];
     
     // Remove duplicates
     const uniqueSkills = Array.from(
-      new Map(initialFiltered.map(item => [item.name, item])).values()
+      new Map(allFilteredSkills.map(item => [item.name, item])).values()
     );
     
     setFilteredSkills(uniqueSkills);
@@ -234,7 +286,23 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
   
   // Handle search and filter changes
   useEffect(() => {
-    let skillsToFilter = [...recommendedSkills, ...allSkillsDataset];
+    let skillsToFilter: Array<{name: string, category: SkillCategory, relevance?: 'essential' | 'recommended' | 'optional', score?: number}> = [];
+    
+    // If showing all skills, combine all categorized skills
+    if (showAllSkills) {
+      skillsToFilter = Object.values(categorizedSkillsDataset).flat();
+      // Add the recommendations to ensure they're included
+      skillsToFilter = [...skillsToFilter, ...recommendedSkills];
+    } else {
+      // Otherwise, just use the recommended skills and a smaller selection
+      skillsToFilter = [...recommendedSkills];
+      
+      // Add a small selection from each category
+      Object.entries(categorizedSkillsDataset).forEach(([category, skills]) => {
+        const categorySkills = skills.slice(0, 3); // Just take the first 3 from each category
+        skillsToFilter.push(...categorySkills);
+      });
+    }
     
     // Remove duplicates
     skillsToFilter = Array.from(
@@ -260,7 +328,7 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
     }
     
     setFilteredSkills(skillsToFilter);
-  }, [searchQuery, filter, recommendedSkills]);
+  }, [searchQuery, filter, recommendedSkills, showAllSkills]);
   
   const handleSkillToggle = (skill: {name: string, category: SkillCategory, relevance?: 'essential' | 'recommended' | 'optional', score?: number}) => {
     const newSkill: Skill = {
@@ -360,13 +428,25 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
         )}
         
         <div>
-          <h3 className="font-medium text-lg mb-3">
-            {filter !== 'all' ? `${filter.charAt(0).toUpperCase() + filter.slice(1)} Skills` : 'All Skills'}
-          </h3>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium text-lg">
+              {filter !== 'all' ? `${filter.charAt(0).toUpperCase() + filter.slice(1)} Skills` : 'Common Skills'}
+            </h3>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowAllSkills(!showAllSkills)}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              {showAllSkills ? 'Show Less' : 'Show More Skills'}
+            </Button>
+          </div>
+          
           {filteredSkills.length > 0 ? (
             <div className="flex flex-wrap">
               {filteredSkills
                 .filter(skill => !recommendedSkills.some(r => r.name === skill.name) || filter !== 'all')
+                .slice(0, showAllSkills ? undefined : 20) // Limit to 20 skills unless Show More is clicked
                 .map((skill) => {
                   const selectedSkill = getSkillByName(skill.name);
                   return (
