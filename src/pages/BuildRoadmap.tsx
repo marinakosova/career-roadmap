@@ -620,7 +620,7 @@ const BuildRoadmap = () => {
           step={2}
           totalSteps={3}
           title="Tell us more about your background"
-          subtitle="The more you add, the more personalized and relevant results you'll get. Add skills, set your proficiency level, and create a comprehensive skill inventory for your career path."
+          subtitle="The more you add, the more personalized and relevant results you'll get. Add skills and set your proficiency level to create a comprehensive skill inventory."
         >
           <div className="space-y-6">
             <div>
@@ -633,47 +633,15 @@ const BuildRoadmap = () => {
               />
             </div>
 
-            <Tabs defaultValue="skills" value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="skills">Skill Selection</TabsTrigger>
-                <TabsTrigger value="learning">Learning Path</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="skills" className="space-y-4 pt-4">
-                <SkillRecommendations
-                  currentRole={currentRole}
-                  desiredRole={desiredRole}
-                  selectedSkills={selectedSkills}
-                  onSkillToggle={toggleSkill}
-                  onSkillProficiencyChange={updateSkillProficiency}
-                />
-              </TabsContent>
-              
-              <TabsContent value="learning" className="pt-4">
-                {selectedSkills.length > 0 ? (
-                  <PersonalizedLearning
-                    selectedSkills={selectedSkills}
-                    currentRole={currentRole}
-                    desiredRole={desiredRole}
-                  />
-                ) : (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                    <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-medium text-gray-700 mb-1">No skills selected yet</h3>
-                    <p className="text-gray-500 max-w-md mx-auto mb-4">
-                      Select skills from the "Skill Selection" tab to generate your personalized learning recommendations.
-                    </p>
-                    <button
-                      className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                      onClick={() => setActiveTab('skills')}
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Go to Skill Selection
-                    </button>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+            <div className="space-y-4">
+              <SkillRecommendations
+                currentRole={currentRole}
+                desiredRole={desiredRole}
+                selectedSkills={selectedSkills}
+                onSkillToggle={toggleSkill}
+                onSkillProficiencyChange={updateSkillProficiency}
+              />
+            </div>
 
             <div>
               <label className="font-medium">Your current state (optional)</label>
