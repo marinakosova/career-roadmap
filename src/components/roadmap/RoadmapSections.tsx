@@ -8,6 +8,7 @@ import { marketData, salaryData } from '@/lib/chartData';
 const similarRolesMap: Record<string, string[]> = {
   'Product Manager': ['Product Owner', 'Technical Product Manager', 'UX Product Manager', 'Digital Product Manager', 'Product Marketing Manager'],
   'Software Engineer': ['Frontend Developer', 'Backend Engineer', 'Full Stack Developer', 'DevOps Engineer', 'Mobile Developer'],
+  'Frontend Engineer': ['UI Developer', 'Frontend Developer', 'Web Developer', 'JavaScript Developer', 'React Developer'],
   'Data Scientist': ['Data Analyst', 'Machine Learning Engineer', 'AI Researcher', 'Quantitative Analyst', 'Business Intelligence Analyst'],
   'UX Designer': ['UI Designer', 'Product Designer', 'Interaction Designer', 'User Researcher', 'Information Architect'],
   'Marketing Manager': ['Brand Manager', 'Digital Marketing Manager', 'Content Marketing Manager', 'Growth Marketer', 'SEO Specialist']
@@ -22,18 +23,29 @@ export const OverviewSection = ({ desiredRole }: { desiredRole?: string }) => {
   const getSimilarRoles = () => {
     if (!desiredRole) return defaultSimilarRoles;
     
+    // Normalize the desired role for comparison (lowercase)
+    const normalizedDesiredRole = desiredRole.toLowerCase();
+    
     // Try to find exact match
     if (similarRolesMap[desiredRole]) {
       return similarRolesMap[desiredRole];
     }
     
-    // Try to find partial match
-    const partialMatch = Object.keys(similarRolesMap).find(role => 
-      desiredRole.toLowerCase().includes(role.toLowerCase()) || 
-      role.toLowerCase().includes(desiredRole.toLowerCase())
+    // Look for case-insensitive exact match
+    const exactMatchKey = Object.keys(similarRolesMap).find(
+      key => key.toLowerCase() === normalizedDesiredRole
+    );
+    if (exactMatchKey) {
+      return similarRolesMap[exactMatchKey];
+    }
+    
+    // Try to find partial match - check if any key contains the desired role or vice versa
+    const partialMatchKey = Object.keys(similarRolesMap).find(key => 
+      normalizedDesiredRole.includes(key.toLowerCase()) || 
+      key.toLowerCase().includes(normalizedDesiredRole)
     );
     
-    return partialMatch ? similarRolesMap[partialMatch] : defaultSimilarRoles;
+    return partialMatchKey ? similarRolesMap[partialMatchKey] : defaultSimilarRoles;
   };
   
   const displayedSimilarRoles = getSimilarRoles();
