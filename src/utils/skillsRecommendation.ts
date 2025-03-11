@@ -1,3 +1,4 @@
+
 import { SkillCategory, Skill, SkillProficiency } from '@/context/RoadmapContext';
 
 export type SkillRelevance = 'essential' | 'recommended' | 'optional';
@@ -35,6 +36,46 @@ export const roleSkillsData: RoleSkillsMap = {
     { name: 'Version Control', category: 'technical', relevance: 'essential', score: 85 },
     { name: 'UI/UX Principles', category: 'domain', relevance: 'recommended', score: 80 },
   ],
+  'digital marketing': [
+    { name: 'SEO', category: 'technical', relevance: 'essential', score: 95 },
+    { name: 'Content Marketing', category: 'business', relevance: 'essential', score: 93 },
+    { name: 'Social Media Marketing', category: 'technical', relevance: 'essential', score: 92 },
+    { name: 'Google Analytics', category: 'analytics', relevance: 'essential', score: 90 },
+    { name: 'PPC Advertising', category: 'technical', relevance: 'essential', score: 88 },
+    { name: 'Email Marketing', category: 'technical', relevance: 'essential', score: 87 },
+    { name: 'Marketing Automation', category: 'technical', relevance: 'recommended', score: 85 },
+    { name: 'Content Strategy', category: 'business', relevance: 'essential', score: 86 },
+    { name: 'CRO (Conversion Rate Optimization)', category: 'analytics', relevance: 'recommended', score: 84 },
+    { name: 'Data Analysis', category: 'analytics', relevance: 'essential', score: 85 },
+    { name: 'Copywriting', category: 'business', relevance: 'essential', score: 88 },
+    { name: 'Brand Management', category: 'business', relevance: 'recommended', score: 83 },
+  ],
+  'marketing': [
+    { name: 'Marketing Strategy', category: 'business', relevance: 'essential', score: 95 },
+    { name: 'Market Research', category: 'analytics', relevance: 'essential', score: 92 },
+    { name: 'Brand Development', category: 'business', relevance: 'essential', score: 90 },
+    { name: 'Content Creation', category: 'business', relevance: 'essential', score: 88 },
+    { name: 'Social Media', category: 'technical', relevance: 'essential', score: 87 },
+    { name: 'Digital Marketing', category: 'technical', relevance: 'essential', score: 86 },
+    { name: 'Campaign Management', category: 'business', relevance: 'essential', score: 85 },
+    { name: 'Analytics', category: 'analytics', relevance: 'essential', score: 88 },
+    { name: 'Customer Segmentation', category: 'analytics', relevance: 'recommended', score: 84 },
+    { name: 'Marketing Automation', category: 'technical', relevance: 'recommended', score: 83 },
+  ],
+  'marketing manager': [
+    { name: 'SEO', category: 'technical', relevance: 'essential', score: 95 },
+    { name: 'Content Strategy', category: 'technical', relevance: 'essential', score: 92 },
+    { name: 'Social Media', category: 'technical', relevance: 'essential', score: 90 },
+    { name: 'Analytics', category: 'analytics', relevance: 'essential', score: 88 },
+    { name: 'Email Marketing', category: 'technical', relevance: 'essential', score: 87 },
+    { name: 'Branding', category: 'technical', relevance: 'essential', score: 86 },
+    { name: 'Campaign Management', category: 'technical', relevance: 'essential', score: 85 },
+    { name: 'Team Leadership', category: 'soft', relevance: 'essential', score: 90 },
+    { name: 'Budget Management', category: 'business', relevance: 'essential', score: 88 },
+    { name: 'Strategic Planning', category: 'business', relevance: 'essential', score: 89 },
+    { name: 'Project Management', category: 'business', relevance: 'recommended', score: 84 },
+    { name: 'Stakeholder Communication', category: 'soft', relevance: 'essential', score: 86 },
+  ],
   'product manager': [
     { name: 'Product Analytics', category: 'analytics', relevance: 'essential', score: 95 },
     { name: 'Customer Interviews', category: 'soft', relevance: 'essential', score: 94 },
@@ -71,15 +112,6 @@ export const roleSkillsData: RoleSkillsMap = {
     { name: 'User Testing', category: 'soft', relevance: 'essential', score: 86 },
     { name: 'Adobe XD', category: 'technical', relevance: 'recommended', score: 82 },
   ],
-  'marketing manager': [
-    { name: 'SEO', category: 'technical', relevance: 'essential', score: 95 },
-    { name: 'Content Strategy', category: 'technical', relevance: 'essential', score: 92 },
-    { name: 'Social Media', category: 'technical', relevance: 'essential', score: 90 },
-    { name: 'Analytics', category: 'analytics', relevance: 'essential', score: 88 },
-    { name: 'Email Marketing', category: 'technical', relevance: 'essential', score: 87 },
-    { name: 'Branding', category: 'technical', relevance: 'essential', score: 86 },
-    { name: 'Campaign Management', category: 'technical', relevance: 'essential', score: 85 },
-  ],
   'project manager': [
     { name: 'Agile', category: 'technical', relevance: 'essential', score: 95 },
     { name: 'Scrum', category: 'technical', relevance: 'essential', score: 92 },
@@ -106,15 +138,56 @@ const normalizeRoleName = (role: string): string => {
     .trim();
 };
 
-// Function to find similar roles
-const findSimilarRoles = (role: string): string[] => {
+// Function to find similar roles based on keywords
+const findSimilarRolesByKeywords = (role: string): string[] => {
   const normalizedRole = normalizeRoleName(role);
-  return Object.keys(roleSkillsData).filter(r => {
-    const normalized = normalizeRoleName(r);
-    return normalized.includes(normalizedRole) || 
-           normalizedRole.includes(normalized) ||
-           (normalized.includes('developer') && normalizedRole.includes('developer'));
-  });
+  const roleKeywords: Record<string, string[]> = {
+    'marketing': ['marketing', 'digital marketing', 'content', 'seo', 'social media', 'brand'],
+    'software': ['software', 'developer', 'engineer', 'programming', 'coder', 'frontend', 'backend'],
+    'data': ['data', 'analyst', 'scientist', 'analytics', 'statistics', 'machine learning'],
+    'design': ['design', 'ux', 'ui', 'user experience', 'graphic', 'creative'],
+    'product': ['product', 'manager', 'owner', 'management'],
+    'project': ['project', 'manager', 'coordinator', 'management'],
+  };
+
+  // Check if normalizedRole contains any of the keywords
+  for (const [category, keywords] of Object.entries(roleKeywords)) {
+    for (const keyword of keywords) {
+      if (normalizedRole.includes(keyword)) {
+        // Return matching roles from that category
+        return Object.keys(roleSkillsData).filter(r => 
+          keywords.some(k => normalizeRoleName(r).includes(k))
+        );
+      }
+    }
+  }
+  
+  return [];
+};
+
+// Find the best matching role in our dataset
+const findBestMatchingRole = (role: string): string | null => {
+  const normalizedRole = normalizeRoleName(role);
+  
+  // Direct match
+  if (roleSkillsData[normalizedRole]) {
+    return normalizedRole;
+  }
+  
+  // Check for partial matches
+  for (const key of Object.keys(roleSkillsData)) {
+    if (normalizedRole.includes(key) || key.includes(normalizedRole)) {
+      return key;
+    }
+  }
+  
+  // Check for keyword-based matches
+  const similarRoles = findSimilarRolesByKeywords(normalizedRole);
+  if (similarRoles.length > 0) {
+    return similarRoles[0];
+  }
+  
+  return null;
 };
 
 // Main recommendation function
@@ -125,14 +198,42 @@ export const getRecommendedSkills = (
   const normalizedDesired = normalizeRoleName(desiredRole);
   const normalizedCurrent = normalizeRoleName(currentRole);
   
-  // Get exact role skills or find similar roles
-  const targetSkills = roleSkillsData[normalizedDesired] || 
-    Object.entries(roleSkillsData)
-      .find(([role]) => 
-        role.includes(normalizedDesired) || 
-        normalizedDesired.includes(role)
-      )?.[1] ||
-    [];
+  // Try to find best matching role
+  const bestMatchRole = findBestMatchingRole(normalizedDesired);
+  
+  // Get target skills
+  let targetSkills: SkillDefinition[] = [];
+  
+  if (bestMatchRole && roleSkillsData[bestMatchRole]) {
+    targetSkills = roleSkillsData[bestMatchRole];
+  } else {
+    // Fallback to keyword-based matching
+    const similarRoles = findSimilarRolesByKeywords(normalizedDesired);
+    if (similarRoles.length > 0) {
+      for (const similarRole of similarRoles) {
+        if (roleSkillsData[similarRole]) {
+          targetSkills = [...targetSkills, ...roleSkillsData[similarRole]];
+          break;
+        }
+      }
+    }
+  }
+  
+  // If still no match, use universal skills as fallback
+  if (targetSkills.length === 0) {
+    targetSkills = universalSkills;
+    
+    // For complete fallback, add some general skills based on high-level categories
+    if (normalizedDesired.includes('market')) {
+      targetSkills = [...targetSkills, ...roleSkillsData['marketing']];
+    } else if (normalizedDesired.includes('develop') || normalizedDesired.includes('program')) {
+      targetSkills = [...targetSkills, ...roleSkillsData['software developer']];
+    } else if (normalizedDesired.includes('data')) {
+      targetSkills = [...targetSkills, ...roleSkillsData['data scientist']];
+    } else if (normalizedDesired.includes('design')) {
+      targetSkills = [...targetSkills, ...roleSkillsData['ux designer']];
+    }
+  }
   
   // Get current role skills for transition bonus
   const currentSkills = roleSkillsData[normalizedCurrent] || [];
@@ -152,5 +253,10 @@ export const getRecommendedSkills = (
     };
   });
 
-  return scoredSkills.sort((a, b) => b.score - a.score);
+  // Remove any duplicates (in case we combined skills from multiple sources)
+  const uniqueSkills = Array.from(
+    new Map(scoredSkills.map(item => [item.name, item])).values()
+  );
+
+  return uniqueSkills.sort((a, b) => b.score - a.score);
 };

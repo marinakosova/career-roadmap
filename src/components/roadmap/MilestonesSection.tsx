@@ -20,12 +20,16 @@ const MilestonesSection: React.FC<MilestonesSectionProps> = ({
     budget,
     companySize,
     timeCommitment,
-    selectedSkills
+    selectedSkills,
+    desiredRole: contextDesiredRole
   } = useRoadmap();
+
+  // Use provided desiredRole or fall back to the one from context
+  const effectiveDesiredRole = desiredRole || contextDesiredRole || '';
 
   // Generate personalized milestones using all available context
   const displayedMilestones = generatePersonalizedMilestones(
-      desiredRole,
+      effectiveDesiredRole,
       currentState || '',
       budget || '',
       companySize || '',
@@ -37,7 +41,7 @@ const MilestonesSection: React.FC<MilestonesSectionProps> = ({
     <div className="space-y-8">
       <div className="relative pl-8">
         <h2 className="text-2xl font-bold mb-6">
-          Your Career Milestones for {desiredRole || 'Your Career'}
+          Your Career Milestones for {effectiveDesiredRole || 'Your Career'}
         </h2>
         
         <div className="space-y-2">
