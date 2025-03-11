@@ -137,10 +137,10 @@ export const generatePersonalizedMilestones = (
 
     // Create milestone with all enhancements
     const milestone: Milestone = {
-      id: \`milestone-\${Date.now()}-\${index}\`,
+      id: `milestone-${Date.now()}-${index}`,
       title: base.title,
       description: enhancedDescription,
-      timeline: \`\${Math.round(duration)} \${unit}\`,
+      timeline: `${Math.round(duration)} ${unit}`,
       completed: false,
       progress: 0,
       skills: selectedSkills.slice(index * 2, (index * 2) + 2), // Distribute skills across milestones
@@ -156,9 +156,9 @@ export const generatePersonalizedMilestones = (
   if (stateAdjustments) {
     stateAdjustments.priority.forEach((priority, index) => {
       const additionalMilestone: Milestone = {
-        id: \`milestone-\${Date.now()}-priority-\${index}\`,
-        title: \`\${priority.charAt(0).toUpperCase() + priority.slice(1)}\`,
-        description: \`Focus on \${priority} to address your current situation\`,
+        id: `milestone-${Date.now()}-priority-${index}`,
+        title: `${priority.charAt(0).toUpperCase() + priority.slice(1)}`,
+        description: `Focus on ${priority} to address your current situation`,
         timeline: '2 weeks',
         completed: false,
         progress: 0,
