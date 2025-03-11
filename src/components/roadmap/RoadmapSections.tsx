@@ -12,7 +12,9 @@ const similarRolesMap: Record<string, string[]> = {
   'Data Scientist': ['Data Analyst', 'Machine Learning Engineer', 'AI Researcher', 'Quantitative Analyst', 'Business Intelligence Analyst'],
   'UX Designer': ['UI Designer', 'Product Designer', 'Interaction Designer', 'User Researcher', 'Information Architect'],
   'Marketing Manager': ['Brand Manager', 'Digital Marketing Manager', 'Content Marketing Manager', 'Growth Marketer', 'SEO Specialist'],
-  'Data Analyst': ['Business Analyst', 'Data Engineer', 'BI Developer', 'Analytics Specialist', 'Financial Analyst']
+  'Data Analyst': ['Business Analyst', 'Data Engineer', 'BI Developer', 'Analytics Specialist', 'Financial Analyst'],
+  'Project Manager': ['Scrum Master', 'Program Manager', 'Agile Coach', 'Delivery Manager', 'Technical Project Manager'],
+  'Backend Engineer': ['API Developer', 'Database Administrator', 'Systems Engineer', 'Cloud Engineer', 'Infrastructure Developer']
   // Add more role mappings as needed
 };
 

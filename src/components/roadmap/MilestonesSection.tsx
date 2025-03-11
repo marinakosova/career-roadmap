@@ -45,7 +45,103 @@ const roleSpecificSkills: Record<string, string[][]> = {
     ['Design Systems', 'User Testing', 'Information Architecture', 'Interaction Design'],
     // Advanced skills
     ['Design Leadership', 'UX Strategy', 'Design Ops', 'Design Thinking']
+  ],
+  'Data Analyst': [
+    // Early career skills
+    ['SQL', 'Excel', 'Data Visualization', 'Statistical Analysis'],
+    // Mid-level skills
+    ['Python/R', 'Business Intelligence Tools', 'Data Modeling', 'Dashboard Creation'],
+    // Advanced skills
+    ['Predictive Analytics', 'Data Strategy', 'Stakeholder Consulting', 'Advanced ETL']
+  ],
+  'Frontend Engineer': [
+    // Early career skills
+    ['HTML/CSS', 'JavaScript', 'Responsive Design', 'Version Control'],
+    // Mid-level skills
+    ['React/Vue/Angular', 'State Management', 'Testing', 'Performance Optimization'],
+    // Advanced skills
+    ['Architecture', 'Design Systems', 'Accessibility', 'Team Leadership']
+  ],
+  'Backend Engineer': [
+    // Early career skills
+    ['Node.js/Java/Python', 'REST APIs', 'Databases', 'Authentication'],
+    // Mid-level skills
+    ['System Design', 'Caching', 'Microservices', 'Security'],
+    // Advanced skills
+    ['Distributed Systems', 'Scalability', 'DevOps', 'Architecture']
   ]
+};
+
+// Define actionable steps for each career stage
+const roleSpecificActionableSteps: Record<string, Record<string, string[]>> = {
+  default: {
+    'beginning': [
+      'Complete a self-assessment of your current skills',
+      'Create a learning plan targeting your skill gaps',
+      'Build a portfolio showcasing your work'
+    ],
+    'middle': [
+      'Seek mentorship from industry professionals',
+      'Contribute to open-source or volunteer projects',
+      'Join professional communities in your field'
+    ],
+    'advanced': [
+      'Lead projects to demonstrate leadership skills',
+      'Present at industry conferences or meetups',
+      'Mentor junior professionals in your field'
+    ]
+  },
+  'Software Engineer': {
+    'beginning': [
+      'Complete 2-3 personal coding projects for your portfolio',
+      'Master data structures and algorithms fundamentals',
+      'Contribute to an open-source project on GitHub'
+    ],
+    'middle': [
+      'Learn system design principles and patterns',
+      'Build a full-stack application with modern architecture',
+      'Implement CI/CD pipelines for your projects'
+    ],
+    'advanced': [
+      'Lead a technical project with multiple developers',
+      'Design scalable systems with microservices',
+      'Mentor junior developers on best practices'
+    ]
+  },
+  'Data Scientist': {
+    'beginning': [
+      'Build projects using Pandas, NumPy and matplotlib',
+      'Create a GitHub repository with data analysis examples',
+      'Participate in Kaggle competitions for practical experience'
+    ],
+    'middle': [
+      'Implement machine learning models in production',
+      'Create an end-to-end data science pipeline',
+      'Master feature engineering and model optimization'
+    ],
+    'advanced': [
+      'Develop custom ML algorithms for specific business needs',
+      'Lead data science initiatives that drive business outcomes',
+      'Establish data science best practices for your organization'
+    ]
+  },
+  'Product Manager': {
+    'beginning': [
+      'Create a product roadmap for a mock product',
+      'Learn user research methodologies and tools',
+      'Build simple prototypes using Figma or similar tools'
+    ],
+    'middle': [
+      'Lead a product feature from ideation to launch',
+      'Develop metrics frameworks to measure product success',
+      'Collaborate with engineering teams on technical requirements'
+    ],
+    'advanced': [
+      'Develop a product strategy aligned with business goals',
+      'Build and lead cross-functional product teams',
+      'Create product vision and obtain stakeholder buy-in'
+    ]
+  }
 };
 
 interface MilestonesSectionProps {
@@ -54,14 +150,67 @@ interface MilestonesSectionProps {
 }
 
 const MilestonesSection: React.FC<MilestonesSectionProps> = ({ milestones, desiredRole }) => {
+  // Normalize the desired role for matching purposes
+  const normalizedDesiredRole = desiredRole ? desiredRole.trim() : '';
+  
+  // Find the best matching role category
+  const findBestMatchingRole = (role: string): string => {
+    if (!role) return 'default';
+    
+    const exactMatch = Object.keys(roleSpecificSkills).find(
+      key => key.toLowerCase() === role.toLowerCase()
+    );
+    
+    if (exactMatch) return exactMatch;
+    
+    // Check for partial matches
+    const partialMatch = Object.keys(roleSpecificSkills).find(
+      key => key.toLowerCase().includes(role.toLowerCase()) || 
+             role.toLowerCase().includes(key.toLowerCase())
+    );
+    
+    if (partialMatch) return partialMatch;
+    
+    // Keywords-based matching
+    if (role.toLowerCase().includes('data')) {
+      if (role.toLowerCase().includes('scien')) return 'Data Scientist';
+      if (role.toLowerCase().includes('analy')) return 'Data Analyst';
+    }
+    
+    if (role.toLowerCase().includes('develop') || role.toLowerCase().includes('engineer')) {
+      if (role.toLowerCase().includes('front')) return 'Frontend Engineer';
+      if (role.toLowerCase().includes('back')) return 'Backend Engineer';
+      return 'Software Engineer';
+    }
+    
+    if (role.toLowerCase().includes('product')) return 'Product Manager';
+    if (role.toLowerCase().includes('design')) return 'UX Designer';
+    
+    return 'default';
+  };
+  
+  const matchedRole = findBestMatchingRole(normalizedDesiredRole);
+  
   // Add relevant, realistic skills to each milestone based on its position in the roadmap
-  const enhanceSkillsForMilestones = (milestones: Milestone[], desiredRole: string = 'default'): Milestone[] => {
-    const roleSkills = roleSpecificSkills[desiredRole] || roleSpecificSkills.default;
+  const enhanceSkillsForMilestones = (milestones: Milestone[], matchedRole: string): Milestone[] => {
+    const roleSkills = roleSpecificSkills[matchedRole] || roleSpecificSkills.default;
+    const actionableSteps = roleSpecificActionableSteps[matchedRole] || roleSpecificActionableSteps.default;
     
     return milestones.map((milestone, index) => {
       // Determine which skill set to use based on milestone position
+      const totalMilestones = milestones.length;
+      let careerStage: 'beginning' | 'middle' | 'advanced';
+      
+      if (index < totalMilestones / 3) {
+        careerStage = 'beginning';
+      } else if (index < (totalMilestones * 2) / 3) {
+        careerStage = 'middle';
+      } else {
+        careerStage = 'advanced';
+      }
+      
       const skillSetIndex = Math.min(
-        Math.floor((index / milestones.length) * roleSkills.length),
+        Math.floor((index / totalMilestones) * roleSkills.length),
         roleSkills.length - 1
       );
       
@@ -71,20 +220,44 @@ const MilestonesSection: React.FC<MilestonesSectionProps> = ({ milestones, desir
         name: skillName
       }));
       
+      // Enhance the steps based on career stage
+      const steps = milestone.steps.map((step, stepIndex) => {
+        const stageSteps = actionableSteps[careerStage] || [];
+        if (stepIndex < stageSteps.length) {
+          return {
+            ...step,
+            description: stageSteps[stepIndex]
+          };
+        }
+        return step;
+      });
+      
+      // Add more personalized description
+      let enhancedDescription = milestone.description;
+      if (milestone.title.includes('Skill Assessment')) {
+        enhancedDescription = `Identify your current ${matchedRole} skills and compare them with industry requirements`;
+      } else if (milestone.title.includes('Learning Path')) {
+        enhancedDescription = `Develop a structured learning plan for acquiring essential ${matchedRole} skills`;
+      } else if (milestone.title.includes('Portfolio')) {
+        enhancedDescription = `Create demonstrable projects that showcase your ${matchedRole} expertise`;
+      }
+      
       return {
         ...milestone,
-        skills: enhancedSkills
+        description: enhancedDescription,
+        skills: enhancedSkills,
+        steps: steps
       };
     });
   };
 
-  // Get the enhanced milestones with more relevant skills
-  const enhancedMilestones = enhanceSkillsForMilestones(milestones, desiredRole);
+  // Get the enhanced milestones with more relevant skills and actionable steps
+  const enhancedMilestones = enhanceSkillsForMilestones(milestones, matchedRole);
 
   return (
     <div className="space-y-8">
       <div className="relative pl-8">
-        <h2 className="text-2xl font-bold mb-6">Your Career Milestones</h2>
+        <h2 className="text-2xl font-bold mb-6">Your Career Milestones for {normalizedDesiredRole || 'Your Career'}</h2>
         
         <div className="space-y-2">
           {enhancedMilestones.map((milestone, index) => (
