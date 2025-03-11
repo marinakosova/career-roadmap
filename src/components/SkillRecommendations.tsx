@@ -181,11 +181,17 @@ const categorizedSkillsDataset: Record<SkillCategory, Array<{name: string, categ
     { name: 'Machine Learning', category: 'domain' },
     { name: 'Artificial Intelligence', category: 'domain' },
   ],
-  'undefined': [
-    { name: 'Industry Knowledge', category: undefined },
+  'industry': [
+    { name: 'Industry Knowledge', category: 'industry' },
+    { name: 'Regulatory Compliance', category: 'industry' },
+    { name: 'Market Trends', category: 'industry' },
+    { name: 'Competitive Analysis', category: 'industry' },
+  ],
+  undefined: [
     { name: 'Academic Research', category: undefined },
     { name: 'Teaching', category: undefined },
     { name: 'Mentoring', category: undefined },
+    { name: 'Personal Development', category: undefined },
   ]
 };
 
@@ -290,15 +296,15 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
     
     // If showing all skills, combine all categorized skills
     if (showAllSkills) {
-      skillsToFilter = Object.values(categorizedSkillsDataset).flat();
-      // Add the recommendations to ensure they're included
-      skillsToFilter = [...skillsToFilter, ...recommendedSkills];
+      // Get skills from all categories, including undefined
+      const allCategorizedSkills = Object.entries(categorizedSkillsDataset).flatMap(([_, skills]) => skills);
+      skillsToFilter = [...allCategorizedSkills, ...recommendedSkills];
     } else {
       // Otherwise, just use the recommended skills and a smaller selection
       skillsToFilter = [...recommendedSkills];
       
       // Add a small selection from each category
-      Object.entries(categorizedSkillsDataset).forEach(([category, skills]) => {
+      Object.entries(categorizedSkillsDataset).forEach(([_, skills]) => {
         const categorySkills = skills.slice(0, 3); // Just take the first 3 from each category
         skillsToFilter.push(...categorySkills);
       });
@@ -406,7 +412,7 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
               Recommended Skills for {desiredRole}
             </h3>
             <div className="flex flex-wrap">
-              {recommendedSkills.map((skill) => {
+              {recommendedSkills.slice(0, 10).map((skill) => {
                 const selectedSkill = getSkillByName(skill.name);
                 return (
                   <SkillTag 
@@ -446,7 +452,7 @@ const SkillRecommendations: React.FC<SkillRecommendationsProps> = ({
             <div className="flex flex-wrap">
               {filteredSkills
                 .filter(skill => !recommendedSkills.some(r => r.name === skill.name) || filter !== 'all')
-                .slice(0, showAllSkills ? undefined : 20) // Limit to 20 skills unless Show More is clicked
+                .slice(0, showAllSkills ? undefined : 10) // Limit to 10 skills unless Show More is clicked
                 .map((skill) => {
                   const selectedSkill = getSkillByName(skill.name);
                   return (
