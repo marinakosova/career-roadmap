@@ -70,8 +70,8 @@ export const generatePersonalizedMilestones = (
       completed: false,
       progress: 0,
       skills: distributedSkills[index] || [],
-      steps: createStepsFromArray(base.steps),
-      tools: createToolsFromArray(base.tools),
+      steps: createStepsFromArray(base.steps || []),
+      tools: createToolsFromArray(base.tools || []),
       resources: createResourcesFromArray([
         ...(base.resources || []),
         ...budgetResources

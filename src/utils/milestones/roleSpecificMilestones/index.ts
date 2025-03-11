@@ -14,9 +14,9 @@ export const roleSpecificMilestones: Record<string, Array<{
   title: string; 
   description: string; 
   timeline: string;
-  steps?: string[];
-  tools?: string[];
-  resources?: string[];
+  steps: string[];
+  tools: string[];
+  resources: string[];
 }>> = {
   'software engineer': softwareEngineerMilestones,
   'software developer': softwareEngineerMilestones,
