@@ -1,109 +1,23 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 
-export type SkillProficiency = 'want-to-learn' | 'want-to-improve' | 'proficient' | undefined;
-export type SkillCategory = 'technical' | 'soft' | 'industry' | 'domain' | 'business' | 'analytics' | undefined;
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { 
+  RoadmapContextType, Skill, SkillProficiency, SkillCategory, 
+  Milestone, ActionableStep, SavedRoadmap
+} from './types';
 
-export interface Skill {
-  id: string;
-  name: string;
-  selected?: boolean;
-  proficiency?: SkillProficiency;
-  category?: SkillCategory;
-}
+import {
+  STORAGE_KEY, CURRENT_ROADMAP_KEY,
+  saveRoadmapsToStorage, loadRoadmapsFromStorage,
+  saveCurrentRoadmapToStorage, loadCurrentRoadmapFromStorage,
+  calculateNextDeadline, countCompletedMilestones
+} from './roadmapStorage';
 
-export interface ActionableStep {
-  id: string;
-  description: string;
-  completed: boolean;
-  deadline?: string;
-}
-
-export interface Tool {
-  id: string;
-  name: string;
-}
-
-export interface Resource {
-  id: string;
-  name: string;
-  url?: string;
-}
-
-export interface Milestone {
-  id: string;
-  title: string;
-  description: string;
-  timeline: string;
-  completed: boolean;
-  progress: number;
-  skills: Skill[];
-  steps: ActionableStep[];
-  tools: Tool[];
-  resources: Resource[];
-  feedback?: 'like' | 'dislike' | null;
-}
-
-export interface SavedRoadmap {
-  id: string;
-  title: string;
-  createdAt: string;
-  progress: number;
-  milestones: Milestone[];
-  desiredRole: string;
-  budget?: string;
-  companySize?: string;
-  timeCommitment?: string;
-}
-
-interface RoadmapContextType {
-  currentRole: string;
-  setCurrentRole: Dispatch<SetStateAction<string>>;
-  currentLevel: string;
-  setCurrentLevel: Dispatch<SetStateAction<string>>;
-  experience: string;
-  setExperience: Dispatch<SetStateAction<string>>;
-  desiredRole: string;
-  setDesiredRole: Dispatch<SetStateAction<string>>;
-  desiredLevel: string;
-  setDesiredLevel: Dispatch<SetStateAction<string>>;
-  background: string;
-  setBackground: Dispatch<SetStateAction<string>>;
-  skills: Skill[];
-  setSkills: Dispatch<SetStateAction<Skill[]>>;
-  selectedSkills: Skill[];
-  setSelectedSkills: Dispatch<SetStateAction<Skill[]>>;
-  currentState: string;
-  setCurrentState: Dispatch<SetStateAction<string>>;
-  desiredIndustry: string;
-  setDesiredIndustry: Dispatch<SetStateAction<string>>;
-  companySize: string;
-  setCompanySize: Dispatch<SetStateAction<string>>;
-  budget: string;
-  setBudget: Dispatch<SetStateAction<string>>;
-  timeCommitment: string;
-  setTimeCommitment: Dispatch<SetStateAction<string>>;
-  milestones: Milestone[];
-  setMilestones: Dispatch<SetStateAction<Milestone[]>>;
-  completedMilestones: number;
-  setCompletedMilestones: Dispatch<SetStateAction<number>>;
-  nextDeadline: string;
-  setNextDeadline: Dispatch<SetStateAction<string>>;
-  savedRoadmaps: SavedRoadmap[];
-  setSavedRoadmaps: Dispatch<SetStateAction<SavedRoadmap[]>>;
-  saveRoadmap: () => void;
-  deleteRoadmap: (id: string) => void;
-  loadRoadmap: (id: string) => void;
-  swapMilestones: (indexA: number, indexB: number) => void;
-  updateMilestoneStep: (milestoneId: string, stepId: string, updates: Partial<ActionableStep>) => void;
-  addMilestoneStep: (milestoneId: string, step: Omit<ActionableStep, 'id'>) => void;
-  deleteMilestoneStep: (milestoneId: string, stepId: string) => void;
-  toggleMilestoneFeedback: (milestoneId: string, feedback: 'like' | 'dislike') => void;
-}
+import {
+  createNewRoadmap, swapMilestonesInArray, updateStepInMilestone,
+  addStepToMilestone, deleteStepFromMilestone, toggleFeedbackForMilestone
+} from './roadmapUtils';
 
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'career_roadmaps';
-const CURRENT_ROADMAP_KEY = 'current_career_roadmap';
 
 export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentRole, setCurrentRole] = useState('');
@@ -125,96 +39,47 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [nextDeadline, setNextDeadline] = useState('');
   const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>([]);
 
+  // Load saved roadmaps on mount
   useEffect(() => {
-    const loadSavedRoadmaps = () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const parsedData = JSON.parse(saved);
-          setSavedRoadmaps(parsedData);
-        } catch (error) {
-          console.error('Error loading saved roadmaps:', error);
-        }
-      }
-    };
-    
-    loadSavedRoadmaps();
-  }, []);
-
-  useEffect(() => {
-    const loadCurrentRoadmap = () => {
-      const currentRoadmap = localStorage.getItem(CURRENT_ROADMAP_KEY);
-      if (currentRoadmap) {
-        try {
-          const parsedData = JSON.parse(currentRoadmap);
-          setDesiredRole(parsedData.desiredRole || '');
-          setMilestones(parsedData.milestones || []);
-          setBudget(parsedData.budget || '');
-          setCompanySize(parsedData.companySize || '');
-          setTimeCommitment(parsedData.timeCommitment || '');
-          
-          const completed = (parsedData.milestones || []).filter((m: Milestone) => m.completed).length;
-          setCompletedMilestones(completed);
-          
-          const upcomingSteps = (parsedData.milestones || [])
-            .flatMap((m: Milestone) => m.steps)
-            .filter((s: ActionableStep) => !s.completed && s.deadline);
-          
-          if (upcomingSteps.length > 0) {
-            const sortedDeadlines = upcomingSteps.sort((a: ActionableStep, b: ActionableStep) => 
-              new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
-            );
-            const nextDate = new Date(sortedDeadlines[0].deadline as string);
-            setNextDeadline(nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
-          } else {
-            setNextDeadline('No upcoming deadlines');
-          }
-        } catch (error) {
-          console.error('Error loading current roadmap:', error);
-        }
-      }
-    };
-    
-    loadCurrentRoadmap();
-  }, []);
-
-  useEffect(() => {
-    if (savedRoadmaps.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRoadmaps));
+    const loadedRoadmaps = loadRoadmapsFromStorage();
+    if (loadedRoadmaps.length > 0) {
+      setSavedRoadmaps(loadedRoadmaps);
     }
+  }, []);
+
+  // Load current roadmap on mount
+  useEffect(() => {
+    const currentRoadmap = loadCurrentRoadmapFromStorage();
+    if (currentRoadmap) {
+      setDesiredRole(currentRoadmap.desiredRole || '');
+      setMilestones(currentRoadmap.milestones || []);
+      setBudget(currentRoadmap.budget || '');
+      setCompanySize(currentRoadmap.companySize || '');
+      setTimeCommitment(currentRoadmap.timeCommitment || '');
+      
+      const completed = countCompletedMilestones(currentRoadmap.milestones || []);
+      setCompletedMilestones(completed);
+      
+      const nextDeadlineDate = calculateNextDeadline(currentRoadmap.milestones || []);
+      setNextDeadline(nextDeadlineDate);
+    }
+  }, []);
+
+  // Save roadmaps to storage when they change
+  useEffect(() => {
+    saveRoadmapsToStorage(savedRoadmaps);
   }, [savedRoadmaps]);
 
+  // Save current roadmap to storage when relevant state changes
   useEffect(() => {
-    if (milestones.length > 0) {
-      const currentRoadmap = {
-        desiredRole,
-        milestones,
-        budget,
-        companySize,
-        timeCommitment
-      };
-      localStorage.setItem(CURRENT_ROADMAP_KEY, JSON.stringify(currentRoadmap));
-    }
+    saveCurrentRoadmapToStorage(desiredRole, milestones, budget, companySize, timeCommitment);
   }, [milestones, desiredRole, budget, companySize, timeCommitment]);
 
+  // Save the current roadmap
   const saveRoadmap = () => {
     if (!desiredRole.trim() || milestones.length === 0) return;
 
-    const overallProgress = milestones.length > 0
-      ? Math.round(milestones.reduce((sum, m) => sum + m.progress, 0) / milestones.length)
-      : 0;
-
-    const newRoadmap: SavedRoadmap = {
-      id: `roadmap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      title: desiredRole,
-      createdAt: new Date().toISOString(),
-      progress: overallProgress,
-      milestones: [...milestones],
-      desiredRole,
-      budget,
-      companySize,
-      timeCommitment
-    };
+    const newRoadmap = createNewRoadmap(desiredRole, milestones, budget, companySize, timeCommitment);
 
     setSavedRoadmaps(prev => {
       const existingIndex = prev.findIndex(r => r.id === newRoadmap.id);
@@ -228,10 +93,12 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
+  // Delete a roadmap by ID
   const deleteRoadmap = (id: string) => {
     setSavedRoadmaps(prev => prev.filter(roadmap => roadmap.id !== id));
   };
 
+  // Load a roadmap by ID
   const loadRoadmap = (id: string) => {
     const roadmap = savedRoadmaps.find(r => r.id === id);
     if (roadmap) {
@@ -241,137 +108,55 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
       setCompanySize(roadmap.companySize || '');
       setTimeCommitment(roadmap.timeCommitment || '');
       
-      const completed = roadmap.milestones.filter(m => m.completed).length;
+      const completed = countCompletedMilestones(roadmap.milestones);
       setCompletedMilestones(completed);
       
-      const upcomingSteps = roadmap.milestones
-        .flatMap(m => m.steps)
-        .filter(s => !s.completed && s.deadline);
+      const nextDeadlineDate = calculateNextDeadline(roadmap.milestones);
+      setNextDeadline(nextDeadlineDate);
       
-      if (upcomingSteps.length > 0) {
-        const sortedDeadlines = upcomingSteps.sort((a, b) => 
-          new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
-        );
-        const nextDate = new Date(sortedDeadlines[0].deadline as string);
-        setNextDeadline(nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
-      } else {
-        setNextDeadline('No upcoming deadlines');
-      }
-      
-      const currentRoadmap = {
-        desiredRole: roadmap.desiredRole,
-        milestones: roadmap.milestones,
-        budget: roadmap.budget || '',
-        companySize: roadmap.companySize || '',
-        timeCommitment: roadmap.timeCommitment || ''
-      };
-      localStorage.setItem(CURRENT_ROADMAP_KEY, JSON.stringify(currentRoadmap));
+      saveCurrentRoadmapToStorage(
+        roadmap.desiredRole,
+        roadmap.milestones,
+        roadmap.budget || '',
+        roadmap.companySize || '',
+        roadmap.timeCommitment || ''
+      );
     }
   };
 
+  // Swap two milestones in the array
   const swapMilestones = (indexA: number, indexB: number) => {
-    setMilestones(prevMilestones => {
-      const newMilestones = [...prevMilestones];
-      [newMilestones[indexA], newMilestones[indexB]] = [newMilestones[indexB], newMilestones[indexA]];
-      return newMilestones;
-    });
+    setMilestones(prevMilestones => swapMilestonesInArray(prevMilestones, indexA, indexB));
   };
 
+  // Update a step within a milestone
   const updateMilestoneStep = (milestoneId: string, stepId: string, updates: Partial<ActionableStep>) => {
     setMilestones(prevMilestones => {
-      return prevMilestones.map(milestone => {
-        if (milestone.id === milestoneId) {
-          const updatedSteps = milestone.steps.map(step => 
-            step.id === stepId ? { ...step, ...updates } : step
-          );
-          
-          const completedSteps = updatedSteps.filter(step => step.completed).length;
-          const totalSteps = updatedSteps.length;
-          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-          
-          return { 
-            ...milestone, 
-            steps: updatedSteps,
-            progress,
-            completed: progress === 100
-          };
-        }
-        return milestone;
-      });
-    });
-    
-    setMilestones(currentMilestones => {
-      const completed = currentMilestones.filter(m => m.completed).length;
+      const updatedMilestones = updateStepInMilestone(prevMilestones, milestoneId, stepId, updates);
+      const completed = countCompletedMilestones(updatedMilestones);
       setCompletedMilestones(completed);
-      return currentMilestones;
+      return updatedMilestones;
     });
   };
 
+  // Add a new step to a milestone
   const addMilestoneStep = (milestoneId: string, step: Omit<ActionableStep, 'id'>) => {
-    setMilestones(prevMilestones => {
-      return prevMilestones.map(milestone => {
-        if (milestone.id === milestoneId) {
-          const newStep = {
-            id: `step-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            ...step
-          };
-          const updatedSteps = [...milestone.steps, newStep];
-          
-          const completedSteps = updatedSteps.filter(step => step.completed).length;
-          const totalSteps = updatedSteps.length;
-          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-          
-          return { 
-            ...milestone, 
-            steps: updatedSteps,
-            progress
-          };
-        }
-        return milestone;
-      });
-    });
+    setMilestones(prevMilestones => addStepToMilestone(prevMilestones, milestoneId, step));
   };
 
+  // Delete a step from a milestone
   const deleteMilestoneStep = (milestoneId: string, stepId: string) => {
     setMilestones(prevMilestones => {
-      return prevMilestones.map(milestone => {
-        if (milestone.id === milestoneId) {
-          const updatedSteps = milestone.steps.filter(step => step.id !== stepId);
-          
-          const completedSteps = updatedSteps.filter(step => step.completed).length;
-          const totalSteps = updatedSteps.length;
-          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-          
-          return { 
-            ...milestone, 
-            steps: updatedSteps,
-            progress,
-            completed: progress === 100
-          };
-        }
-        return milestone;
-      });
-    });
-    
-    setMilestones(currentMilestones => {
-      const completed = currentMilestones.filter(m => m.completed).length;
+      const updatedMilestones = deleteStepFromMilestone(prevMilestones, milestoneId, stepId);
+      const completed = countCompletedMilestones(updatedMilestones);
       setCompletedMilestones(completed);
-      return currentMilestones;
+      return updatedMilestones;
     });
   };
 
+  // Toggle feedback for a milestone
   const toggleMilestoneFeedback = (milestoneId: string, feedback: 'like' | 'dislike') => {
-    setMilestones(prevMilestones => {
-      return prevMilestones.map(milestone => {
-        if (milestone.id === milestoneId) {
-          return { 
-            ...milestone, 
-            feedback: milestone.feedback === feedback ? null : feedback
-          };
-        }
-        return milestone;
-      });
-    });
+    setMilestones(prevMilestones => toggleFeedbackForMilestone(prevMilestones, milestoneId, feedback));
   };
 
   return (
@@ -433,3 +218,15 @@ export const useRoadmap = (): RoadmapContextType => {
   }
   return context;
 };
+
+// Re-export types for easier access
+export {
+  SkillProficiency,
+  SkillCategory,
+  Skill,
+  ActionableStep,
+  Tool,
+  Resource,
+  Milestone,
+  SavedRoadmap
+} from './types';
