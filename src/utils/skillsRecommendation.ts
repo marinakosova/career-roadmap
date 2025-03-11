@@ -1,4 +1,3 @@
-
 import { SkillCategory, Skill, SkillProficiency } from '@/context/RoadmapContext';
 
 export type SkillRelevance = 'essential' | 'recommended' | 'optional';
@@ -11,6 +10,18 @@ interface SkillDefinition {
 }
 
 type RoleSkillsMap = Record<string, SkillDefinition[]>;
+
+// Enhanced role mapping with variations and synonyms
+const roleAliases: Record<string, string[]> = {
+  'software developer': ['developer', 'software engineer', 'programmer', 'coder', 'web developer', 'frontend developer', 'backend developer', 'full stack developer'],
+  'frontend developer': ['front end developer', 'frontend engineer', 'front-end developer', 'ui developer', 'client side developer'],
+  'digital marketing': ['digital marketer', 'online marketing', 'digital marketing specialist', 'internet marketing'],
+  'marketing manager': ['marketing director', 'marketing lead', 'head of marketing', 'marketing coordinator'],
+  'product manager': ['product owner', 'product lead', 'technical product manager', 'digital product manager'],
+  'data scientist': ['data analyst', 'data engineer', 'machine learning engineer', 'ai engineer'],
+  'ux designer': ['user experience designer', 'ui/ux designer', 'product designer', 'interaction designer'],
+  'project manager': ['project lead', 'project coordinator', 'program manager', 'delivery manager']
+};
 
 // Enhanced role skills dataset with relevance and importance scores
 export const roleSkillsData: RoleSkillsMap = {
@@ -131,66 +142,111 @@ const universalSkills: SkillDefinition[] = [
   { name: 'Teamwork', category: 'soft', relevance: 'essential', score: 87 },
 ];
 
-// Function to normalize role names for better matching
+// Improved role name normalization with better matching
 const normalizeRoleName = (role: string): string => {
-  return role.toLowerCase()
-    .replace(/[-_]/g, ' ')
+  const normalized = role.toLowerCase()
+    .replace(/[-_/]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
-};
 
-// Function to find similar roles based on keywords
-const findSimilarRolesByKeywords = (role: string): string[] => {
-  const normalizedRole = normalizeRoleName(role);
-  const roleKeywords: Record<string, string[]> = {
-    'marketing': ['marketing', 'digital marketing', 'content', 'seo', 'social media', 'brand'],
-    'software': ['software', 'developer', 'engineer', 'programming', 'coder', 'frontend', 'backend'],
-    'data': ['data', 'analyst', 'scientist', 'analytics', 'statistics', 'machine learning'],
-    'design': ['design', 'ux', 'ui', 'user experience', 'graphic', 'creative'],
-    'product': ['product', 'manager', 'owner', 'management'],
-    'project': ['project', 'manager', 'coordinator', 'management'],
-  };
+  // Check for exact match in roleSkillsData
+  if (roleSkillsData[normalized]) {
+    return normalized;
+  }
 
-  // Check if normalizedRole contains any of the keywords
-  for (const [category, keywords] of Object.entries(roleKeywords)) {
-    for (const keyword of keywords) {
-      if (normalizedRole.includes(keyword)) {
-        // Return matching roles from that category
-        return Object.keys(roleSkillsData).filter(r => 
-          keywords.some(k => normalizeRoleName(r).includes(k))
-        );
-      }
+  // Check against aliases
+  for (const [mainRole, aliases] of Object.entries(roleAliases)) {
+    if (aliases.some(alias => 
+      normalized.includes(alias) || 
+      alias.includes(normalized) ||
+      calculateSimilarity(normalized, alias) > 0.8
+    )) {
+      return mainRole;
     }
   }
-  
-  return [];
+
+  return normalized;
 };
 
-// Find the best matching role in our dataset
+// Helper function to calculate string similarity (Levenshtein distance based)
+const calculateSimilarity = (str1: string, str2: string): number => {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+  
+  if (longer.length === 0) return 1.0;
+  
+  const longerLength = longer.length;
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const costs: number[] = [];
+    for (let i = 0; i <= str1.length; i++) {
+      let lastValue = i;
+      for (let j = 0; j <= str2.length; j++) {
+        if (i === 0) {
+          costs[j] = j;
+        } else if (j > 0) {
+          let newValue = costs[j - 1];
+          if (str1.charAt(i - 1) !== str2.charAt(j - 1)) {
+            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+          }
+          costs[j - 1] = lastValue;
+          lastValue = newValue;
+        }
+      }
+      if (i > 0) costs[str2.length] = lastValue;
+    }
+    return costs[str2.length];
+  };
+  
+  return (longerLength - levenshteinDistance(longer, shorter)) / longerLength;
+};
+
+// Enhanced role matching with fallback strategy
 const findBestMatchingRole = (role: string): string | null => {
   const normalizedRole = normalizeRoleName(role);
   
-  // Direct match
+  // Direct match in roleSkillsData
   if (roleSkillsData[normalizedRole]) {
     return normalizedRole;
   }
   
-  // Check for partial matches
-  for (const key of Object.keys(roleSkillsData)) {
-    if (normalizedRole.includes(key) || key.includes(normalizedRole)) {
-      return key;
+  // Check aliases
+  for (const [mainRole, aliases] of Object.entries(roleAliases)) {
+    if (aliases.some(alias => normalizedRole.includes(alias) || alias.includes(normalizedRole))) {
+      return mainRole;
     }
   }
   
-  // Check for keyword-based matches
-  const similarRoles = findSimilarRolesByKeywords(normalizedRole);
-  if (similarRoles.length > 0) {
-    return similarRoles[0];
+  // Find best partial match using similarity
+  let bestMatch = null;
+  let highestSimilarity = 0;
+  
+  const allRoles = [
+    ...Object.keys(roleSkillsData),
+    ...Object.entries(roleAliases).flatMap(([_, aliases]) => aliases)
+  ];
+  
+  for (const candidateRole of allRoles) {
+    const similarity = calculateSimilarity(normalizedRole, candidateRole);
+    if (similarity > highestSimilarity && similarity > 0.6) { // Threshold for similarity
+      highestSimilarity = similarity;
+      bestMatch = candidateRole;
+    }
+  }
+  
+  if (bestMatch) {
+    // If best match is an alias, return its main role
+    for (const [mainRole, aliases] of Object.entries(roleAliases)) {
+      if (aliases.includes(bestMatch)) {
+        return mainRole;
+      }
+    }
+    return bestMatch;
   }
   
   return null;
 };
 
-// Main recommendation function
+// Main recommendation function with improved matching and scoring
 export const getRecommendedSkills = (
   currentRole: string,
   desiredRole: string
@@ -198,40 +254,32 @@ export const getRecommendedSkills = (
   const normalizedDesired = normalizeRoleName(desiredRole);
   const normalizedCurrent = normalizeRoleName(currentRole);
   
-  // Try to find best matching role
+  // Find best matching role
   const bestMatchRole = findBestMatchingRole(normalizedDesired);
   
-  // Get target skills
   let targetSkills: SkillDefinition[] = [];
   
   if (bestMatchRole && roleSkillsData[bestMatchRole]) {
     targetSkills = roleSkillsData[bestMatchRole];
+    console.log(`Matched role "${desiredRole}" to "${bestMatchRole}"`);
   } else {
-    // Fallback to keyword-based matching
-    const similarRoles = findSimilarRolesByKeywords(normalizedDesired);
-    if (similarRoles.length > 0) {
-      for (const similarRole of similarRoles) {
-        if (roleSkillsData[similarRole]) {
-          targetSkills = [...targetSkills, ...roleSkillsData[similarRole]];
-          break;
-        }
-      }
-    }
-  }
-  
-  // If still no match, use universal skills as fallback
-  if (targetSkills.length === 0) {
-    targetSkills = universalSkills;
+    console.log(`No direct match found for "${desiredRole}", using fallback mechanism`);
+    // Find similar roles based on keywords
+    const allRoles = Object.keys(roleSkillsData);
+    const similarRoles = allRoles.filter(role => {
+      const similarity = calculateSimilarity(normalizedDesired, role);
+      return similarity > 0.5;
+    });
     
-    // For complete fallback, add some general skills based on high-level categories
-    if (normalizedDesired.includes('market')) {
-      targetSkills = [...targetSkills, ...roleSkillsData['marketing']];
-    } else if (normalizedDesired.includes('develop') || normalizedDesired.includes('program')) {
-      targetSkills = [...targetSkills, ...roleSkillsData['software developer']];
-    } else if (normalizedDesired.includes('data')) {
-      targetSkills = [...targetSkills, ...roleSkillsData['data scientist']];
-    } else if (normalizedDesired.includes('design')) {
-      targetSkills = [...targetSkills, ...roleSkillsData['ux designer']];
+    if (similarRoles.length > 0) {
+      similarRoles.forEach(role => {
+        targetSkills = [...targetSkills, ...roleSkillsData[role]];
+      });
+      console.log(`Found similar roles: ${similarRoles.join(', ')}`);
+    } else {
+      // Fallback to universal skills and category-based recommendations
+      targetSkills = [...universalSkills];
+      console.log('Using universal skills as fallback');
     }
   }
   
@@ -243,20 +291,24 @@ export const getRecommendedSkills = (
     // Apply transition bonus if skill exists in current role
     const transitionBonus = currentSkills.some(s => s.name === skill.name) ? 10 : 0;
     
+    // Calculate contextual score based on role relevance
+    const contextScore = skill.relevance === 'essential' ? 20 :
+                        skill.relevance === 'recommended' ? 10 : 0;
+    
     return {
       id: `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: skill.name,
       category: skill.category,
       relevance: skill.relevance,
-      score: skill.score + transitionBonus,
+      score: skill.score + transitionBonus + contextScore,
       proficiency: undefined
     };
   });
 
-  // Remove any duplicates (in case we combined skills from multiple sources)
+  // Remove duplicates and sort by score
   const uniqueSkills = Array.from(
     new Map(scoredSkills.map(item => [item.name, item])).values()
-  );
+  ).sort((a, b) => b.score - a.score);
 
-  return uniqueSkills.sort((a, b) => b.score - a.score);
+  return uniqueSkills;
 };
