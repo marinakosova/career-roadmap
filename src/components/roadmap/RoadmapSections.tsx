@@ -11,7 +11,8 @@ const similarRolesMap: Record<string, string[]> = {
   'Frontend Engineer': ['UI Developer', 'Frontend Developer', 'Web Developer', 'JavaScript Developer', 'React Developer'],
   'Data Scientist': ['Data Analyst', 'Machine Learning Engineer', 'AI Researcher', 'Quantitative Analyst', 'Business Intelligence Analyst'],
   'UX Designer': ['UI Designer', 'Product Designer', 'Interaction Designer', 'User Researcher', 'Information Architect'],
-  'Marketing Manager': ['Brand Manager', 'Digital Marketing Manager', 'Content Marketing Manager', 'Growth Marketer', 'SEO Specialist']
+  'Marketing Manager': ['Brand Manager', 'Digital Marketing Manager', 'Content Marketing Manager', 'Growth Marketer', 'SEO Specialist'],
+  'Data Analyst': ['Business Analyst', 'Data Engineer', 'BI Developer', 'Analytics Specialist', 'Financial Analyst']
   // Add more role mappings as needed
 };
 
@@ -23,29 +24,40 @@ export const OverviewSection = ({ desiredRole }: { desiredRole?: string }) => {
   const getSimilarRoles = () => {
     if (!desiredRole) return defaultSimilarRoles;
     
-    // Normalize the desired role for comparison (lowercase)
-    const normalizedDesiredRole = desiredRole.toLowerCase();
+    // Case-insensitive normalized comparison
+    const normalizedDesiredRole = desiredRole.toLowerCase().trim();
     
-    // Try to find exact match
-    if (similarRolesMap[desiredRole]) {
-      return similarRolesMap[desiredRole];
+    // Try direct matches first (case insensitive)
+    for (const [key, roles] of Object.entries(similarRolesMap)) {
+      if (key.toLowerCase() === normalizedDesiredRole) {
+        return roles;
+      }
     }
     
-    // Look for case-insensitive exact match
-    const exactMatchKey = Object.keys(similarRolesMap).find(
-      key => key.toLowerCase() === normalizedDesiredRole
-    );
-    if (exactMatchKey) {
-      return similarRolesMap[exactMatchKey];
+    // Try partial matches next
+    for (const [key, roles] of Object.entries(similarRolesMap)) {
+      // Check if the normalized desired role contains the key or vice versa
+      if (normalizedDesiredRole.includes(key.toLowerCase()) || 
+          key.toLowerCase().includes(normalizedDesiredRole)) {
+        return roles;
+      }
     }
     
-    // Try to find partial match - check if any key contains the desired role or vice versa
-    const partialMatchKey = Object.keys(similarRolesMap).find(key => 
-      normalizedDesiredRole.includes(key.toLowerCase()) || 
-      key.toLowerCase().includes(normalizedDesiredRole)
-    );
+    // Check for specific keywords
+    const keywordMap: Record<string, string[]> = {
+      'data': ['Data Analyst', 'Data Scientist', 'Data Engineer', 'Business Intelligence Analyst', 'Database Administrator'],
+      'developer': ['Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'Mobile Developer', 'DevOps Engineer'],
+      'manager': ['Product Manager', 'Project Manager', 'Engineering Manager', 'Marketing Manager', 'Customer Success Manager'],
+      'designer': ['UX Designer', 'UI Designer', 'Product Designer', 'Graphic Designer', 'Web Designer']
+    };
     
-    return partialMatchKey ? similarRolesMap[partialMatchKey] : defaultSimilarRoles;
+    for (const [keyword, roles] of Object.entries(keywordMap)) {
+      if (normalizedDesiredRole.includes(keyword)) {
+        return roles;
+      }
+    }
+    
+    return defaultSimilarRoles;
   };
   
   const displayedSimilarRoles = getSimilarRoles();

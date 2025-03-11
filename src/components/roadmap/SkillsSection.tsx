@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Milestone, Skill, useRoadmap, SkillProficiency, SkillCategory } from '@/context/RoadmapContext';
 import { Progress } from "@/components/ui/progress";
@@ -212,9 +213,14 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
             
             const isFocused = focusedSkills.includes(skill.name);
             
+            // Find which milestones actually mention this skill
+            const relevantMilestones = milestones.filter(milestone => 
+              milestone.skills.some(s => s.name === skill.name)
+            );
+            
             return (
               <div 
-                key={skill.id} 
+                key={`skill-card-${skill.id}`}
                 className={cn(
                   "p-5 rounded-xl border transition-all",
                   isFocused ? "border-primary bg-primary/5 shadow-sm" : "border-gray-200 bg-white"
@@ -277,17 +283,16 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
                 <div>
                   <div className="text-sm font-medium mb-2">Relevant Milestones:</div>
                   <div className="space-y-1.5">
-                    {milestonesWithSkill.map(id => {
-                      const milestone = milestones.find(m => m.id === id);
-                      if (!milestone) return null;
-                      
-                      return (
-                        <div key={id} className="flex items-center text-sm">
+                    {relevantMilestones.length > 0 ? (
+                      relevantMilestones.map(milestone => (
+                        <div key={`milestone-${milestone.id}-for-${skill.id}`} className="flex items-center text-sm">
                           <span className="h-2 w-2 rounded-full bg-primary mr-2"></span>
                           <span className="text-gray-700">{milestone.title}</span>
                         </div>
-                      );
-                    })}
+                      ))
+                    ) : (
+                      <div className="text-sm text-gray-500">No specific milestones yet</div>
+                    )}
                   </div>
                 </div>
                 
