@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft, Code, Users, Building2, Brain, Briefcase, LineChart } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, ChevronLeft, Code, Users, Building2, Brain, Briefcase, LineChart, BookOpen, TrendingUp, Star } from 'lucide-react';
 import FormStep from '@/components/FormStep';
 import SkillTag from '@/components/SkillTag';
 import { useRoadmap, Skill, SkillProficiency, SkillCategory } from '@/context/RoadmapContext';
@@ -421,7 +421,12 @@ const BuildRoadmap = () => {
       const uniqueSkillNames = [...new Set(allSkills.map(skill => skill.name))];
       const mixedSkills = uniqueSkillNames.slice(0, 15).map(name => {
         const originalSkill = allSkills.find(s => s.name === name);
-        return { name, category: originalSkill?.category || undefined };
+        return { 
+          name, 
+          category: originalSkill?.category || undefined,
+          id: `suggested-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          proficiency: undefined
+        };
       });
       setSuggestedSkills(mixedSkills);
     }
@@ -851,4 +856,3 @@ const BuildRoadmap = () => {
 };
 
 export default BuildRoadmap;
-
