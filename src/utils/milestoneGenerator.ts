@@ -1,4 +1,3 @@
-
 import { Milestone, Skill } from '@/context/types';
 import { generateSteps, generateTools, generateResources } from './roadmapGenerator';
 
@@ -73,6 +72,80 @@ const currentStateAdjustments: Record<string, {
   }
 };
 
+// Role-specific base milestones
+const roleSpecificMilestones: Record<string, Array<{title: string; description: string; timeline: string}>> = {
+  'Software Engineer': [
+    {
+      title: 'Technical Foundation',
+      description: 'Master core programming concepts and tools',
+      timeline: '3 months'
+    },
+    {
+      title: 'Project Implementation',
+      description: 'Build full-stack applications using modern technologies',
+      timeline: '4 months'
+    },
+    {
+      title: 'System Design & Architecture',
+      description: 'Learn scalable system design principles',
+      timeline: '3 months'
+    }
+  ],
+  'Data Scientist': [
+    {
+      title: 'Data Analysis Foundations',
+      description: 'Master statistical analysis and data manipulation',
+      timeline: '3 months'
+    },
+    {
+      title: 'Machine Learning Implementation',
+      description: 'Build and deploy ML models',
+      timeline: '4 months'
+    },
+    {
+      title: 'Advanced Analytics & Research',
+      description: 'Conduct advanced research and optimize models',
+      timeline: '3 months'
+    }
+  ],
+  'Product Manager': [
+    {
+      title: 'Product Strategy Foundation',
+      description: 'Learn product strategy and market analysis',
+      timeline: '2 months'
+    },
+    {
+      title: 'User Research & Prototyping',
+      description: 'Conduct user research and create product prototypes',
+      timeline: '3 months'
+    },
+    {
+      title: 'Product Launch & Metrics',
+      description: 'Plan and execute product launches with success metrics',
+      timeline: '4 months'
+    }
+  ]
+};
+
+// Default milestones if role isn't found
+const defaultMilestones = [
+  {
+    title: 'Skill Assessment & Planning',
+    description: 'Evaluate current skills and create learning plan',
+    timeline: '2 weeks'
+  },
+  {
+    title: 'Core Competency Development',
+    description: 'Build fundamental skills for your role',
+    timeline: '3 months'
+  },
+  {
+    title: 'Practical Application',
+    description: 'Apply skills through projects and real-world scenarios',
+    timeline: '3 months'
+  }
+];
+
 export const generatePersonalizedMilestones = (
   desiredRole: string,
   currentState: string,
@@ -81,34 +154,8 @@ export const generatePersonalizedMilestones = (
   timeCommitment: string,
   selectedSkills: Skill[]
 ): Milestone[] => {
-  // Base milestones structure
-  const baseMilestones = [
-    {
-      title: 'Skill Assessment & Gap Analysis',
-      description: 'Evaluate your current skills and identify gaps',
-      timeline: '2 weeks'
-    },
-    {
-      title: 'Learning Path Creation',
-      description: 'Design your personalized learning journey',
-      timeline: '1 month'
-    },
-    {
-      title: 'Core Skills Development',
-      description: 'Build fundamental skills for your new role',
-      timeline: '3 months'
-    },
-    {
-      title: 'Portfolio Development',
-      description: 'Create projects showcasing your skills',
-      timeline: '2 months'
-    },
-    {
-      title: 'Industry Network Building',
-      description: 'Connect with professionals in your field',
-      timeline: '2 months'
-    }
-  ];
+  // Select base milestones based on role
+  const baseMilestones = roleSpecificMilestones[desiredRole] || defaultMilestones;
 
   // Adjust timelines based on time commitment
   const timelineMultiplier = timelineAdjustments[timeCommitment] || 1;
@@ -146,7 +193,10 @@ export const generatePersonalizedMilestones = (
       skills: selectedSkills.slice(index * 2, (index * 2) + 2), // Distribute skills across milestones
       steps: generateSteps(base.title),
       tools: generateTools(base.title),
-      resources: generateResources(base.title)
+      resources: budgetResources.map((resource, i) => ({
+        id: `resource-${i}`,
+        name: resource
+      }))
     };
 
     return milestone;
@@ -165,9 +215,11 @@ export const generatePersonalizedMilestones = (
         skills: selectedSkills.slice(0, 2),
         steps: generateSteps(priority),
         tools: generateTools(priority),
-        resources: generateResources(priority)
+        resources: budgetBasedResources[budget]?.map((resource, i) => ({
+          id: `resource-${i}`,
+          name: resource
+        })) || []
       };
-      // Insert priority milestones at the beginning
       personalizedMilestones.unshift(additionalMilestone);
     });
   }
