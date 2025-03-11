@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import LearningResourcesModal from './LearningResourcesModal';
 
 interface SkillsSectionProps {
   desiredRole?: string;
@@ -103,7 +104,9 @@ const getProficiencyInfo = (proficiency?: SkillProficiency) => {
 const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [focusedSkills, setFocusedSkills] = useState<string[]>([]);
-  const { toggleMilestoneFeedback } = useRoadmap();
+  const { toggleMilestoneFeedback, updateSkillProficiency } = useRoadmap();
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<{name: string, proficiency?: SkillProficiency, category?: SkillCategory} | null>(null);
   
   // Collect all skills from milestones
   const allSkills = React.useMemo(() => {
@@ -163,6 +166,61 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
     if (count <= 3) return 'want-to-improve';
     return 'proficient';
   };
+
+  // Function to open the learning resources modal
+  const openResourcesModal = (skill: Skill, proficiency?: SkillProficiency, category?: SkillCategory) => {
+    setSelectedSkill({
+      name: skill.name,
+      proficiency,
+      category
+    });
+    setResourceModalOpen(true);
+  };
+  
+  // Function to get role-specific learning paths
+  const getRoleSpecificLearningPath = (skillName: string, desiredRole?: string, proficiency?: SkillProficiency) => {
+    // Default learning path
+    let path = LEARNING_PATHS[proficiency || 'default'];
+    
+    // Check if we have custom paths for this role and skill combination
+    if (desiredRole) {
+      const normalizedRole = desiredRole.toLowerCase();
+      const normalizedSkill = skillName.toLowerCase();
+      
+      // Example custom paths for specific role + skill combinations
+      if (normalizedRole.includes('developer') || normalizedRole.includes('engineer')) {
+        if (normalizedSkill.includes('javascript') || normalizedSkill.includes('react')) {
+          if (proficiency === 'want-to-learn') {
+            return ['Complete JS Fundamentals course', 'Build a small React app', 'Join developer communities'];
+          } else if (proficiency === 'want-to-improve') {
+            return ['Learn React hooks and patterns', 'Contribute to open source', 'Attend React conferences'];
+          }
+        }
+        
+        if (normalizedSkill.includes('architecture') || normalizedSkill.includes('system design')) {
+          return ['Study system design patterns', 'Read architecture case studies', 'Design a complex system'];
+        }
+      }
+      
+      if (normalizedRole.includes('manager') || normalizedRole.includes('lead')) {
+        if (normalizedSkill.includes('leadership') || normalizedSkill.includes('management')) {
+          return ['Take leadership training', 'Practice delegating tasks', 'Develop a mentoring plan'];
+        }
+        
+        if (normalizedSkill.includes('communication')) {
+          return ['Practice giving feedback', 'Improve presentation skills', 'Learn conflict resolution'];
+        }
+      }
+      
+      if (normalizedRole.includes('data') || normalizedRole.includes('analyst')) {
+        if (normalizedSkill.includes('sql') || normalizedSkill.includes('analysis')) {
+          return ['Master advanced SQL queries', 'Learn data visualization', 'Practice data storytelling'];
+        }
+      }
+    }
+    
+    return path;
+  };
   
   return (
     <div className="space-y-8">
@@ -218,6 +276,9 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
               milestone.skills.some(s => s.name === skill.name)
             );
             
+            // Get role-specific learning path
+            const learningPath = getRoleSpecificLearningPath(skill.name, desiredRole, displayProficiency);
+            
             return (
               <div 
                 key={`skill-card-${skill.id}`}
@@ -254,10 +315,28 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Proficiency Level</span>
-                    <span className={`font-medium ${proficiencyInfo.color}`}>
+                    <div className="flex items-center">
                       {getProficiencyIcon(displayProficiency)}
-                      <span className="ml-1">{proficiencyInfo.name}</span>
-                    </span>
+                      <span className={`ml-1 ${proficiencyInfo.color} cursor-pointer`}
+                        onClick={() => {
+                          // Cycle through proficiency levels
+                          let newProficiency: SkillProficiency;
+                          
+                          if (!displayProficiency || displayProficiency === 'proficient') {
+                            newProficiency = 'want-to-learn';
+                          } else if (displayProficiency === 'want-to-learn') {
+                            newProficiency = 'want-to-improve';
+                          } else {
+                            newProficiency = 'proficient';
+                          }
+                          
+                          // Update proficiency in context
+                          updateSkillProficiency(skill.name, newProficiency);
+                        }}
+                      >
+                        {proficiencyInfo.name}
+                      </span>
+                    </div>
                   </div>
                   <Progress value={levelPercentage} className="h-2" />
                 </div>
@@ -265,7 +344,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
                 <div className="mb-4">
                   <div className="text-sm font-medium mb-2">Learning Path:</div>
                   <ul className="space-y-1">
-                    {LEARNING_PATHS[displayProficiency || 'default'].map((step, i) => (
+                    {learningPath.map((step, i) => (
                       <li key={i} className="text-sm flex items-start">
                         <span className="mr-2 mt-1">
                           {i === 0 ? (
@@ -297,7 +376,12 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-100">
-                  <Button variant="outline" className="w-full text-sm" size="sm">
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-sm" 
+                    size="sm"
+                    onClick={() => openResourcesModal(skill, displayProficiency, category)}
+                  >
                     <BookOpen className="h-4 w-4 mr-2" />
                     Find Learning Resources
                   </Button>
@@ -315,6 +399,17 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ desiredRole, milestones }
           </div>
         )}
       </div>
+      
+      {/* Learning Resources Modal */}
+      {selectedSkill && (
+        <LearningResourcesModal
+          isOpen={resourceModalOpen}
+          onClose={() => setResourceModalOpen(false)}
+          skillName={selectedSkill.name}
+          proficiency={selectedSkill.proficiency}
+          category={selectedSkill.category}
+        />
+      )}
     </div>
   );
 };

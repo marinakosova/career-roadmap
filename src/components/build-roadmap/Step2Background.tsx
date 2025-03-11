@@ -2,7 +2,7 @@
 import React from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import SkillRecommendations from '@/components/SkillRecommendations';
-import { Skill, SkillProficiency } from '@/context/RoadmapContext';
+import { Skill, SkillProficiency, useRoadmap } from '@/context/RoadmapContext';
 
 interface Step2Props {
   background: string;
@@ -11,7 +11,6 @@ interface Step2Props {
   desiredRole: string;
   selectedSkills: Skill[];
   toggleSkill: (skill: Skill) => void;
-  updateSkillProficiency: (skillName: string, proficiency: SkillProficiency) => void;
   currentState: string;
   setCurrentState: (state: string) => void;
   currentStateOptions: string[];
@@ -26,13 +25,14 @@ const Step2Background: React.FC<Step2Props> = ({
   desiredRole,
   selectedSkills,
   toggleSkill,
-  updateSkillProficiency,
   currentState,
   setCurrentState,
   currentStateOptions,
   prevStep,
   nextStep
 }) => {
+  const { updateSkillProficiency } = useRoadmap();
+  
   return (
     <div className="space-y-6">
       <div>

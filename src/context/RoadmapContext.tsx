@@ -54,6 +54,10 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
       setCompanySize(currentRoadmap.companySize || '');
       setTimeCommitment(currentRoadmap.timeCommitment || '');
       
+      if (currentRoadmap.selectedSkills) {
+        setSelectedSkills(currentRoadmap.selectedSkills);
+      }
+      
       const completed = countCompletedMilestones(currentRoadmap.milestones || []);
       setCompletedMilestones(completed);
       
@@ -67,8 +71,8 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [savedRoadmaps]);
 
   useEffect(() => {
-    saveCurrentRoadmapToStorage(desiredRole, milestones, budget, companySize, timeCommitment);
-  }, [milestones, desiredRole, budget, companySize, timeCommitment]);
+    saveCurrentRoadmapToStorage(desiredRole, milestones, budget, companySize, timeCommitment, selectedSkills);
+  }, [milestones, desiredRole, budget, companySize, timeCommitment, selectedSkills]);
 
   const saveRoadmap = () => {
     if (!desiredRole.trim() || milestones.length === 0) return;
@@ -146,6 +150,29 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     setMilestones(prevMilestones => toggleFeedbackForMilestone(prevMilestones, milestoneId, feedback));
   };
 
+  const updateSkillProficiency = (skillName: string, proficiency: SkillProficiency) => {
+    setSelectedSkills(prev => {
+      return prev.map(skill => {
+        if (skill.name === skillName) {
+          return { ...skill, proficiency };
+        }
+        return skill;
+      });
+    });
+    
+    setMilestones(prev => {
+      return prev.map(milestone => {
+        const updatedSkills = milestone.skills.map(skill => {
+          if (skill.name === skillName) {
+            return { ...skill, proficiency };
+          }
+          return skill;
+        });
+        return { ...milestone, skills: updatedSkills };
+      });
+    });
+  };
+
   return (
     <RoadmapContext.Provider
       value={{
@@ -191,6 +218,7 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
         addMilestoneStep,
         deleteMilestoneStep,
         toggleMilestoneFeedback,
+        updateSkillProficiency,
       }}
     >
       {children}

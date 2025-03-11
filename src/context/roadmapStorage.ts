@@ -1,5 +1,5 @@
 
-import { SavedRoadmap, Milestone, ActionableStep } from './types';
+import { SavedRoadmap, Milestone, ActionableStep, Skill } from './types';
 
 // Storage keys
 export const STORAGE_KEY = 'career_roadmaps';
@@ -31,15 +31,17 @@ export const saveCurrentRoadmapToStorage = (
   milestones: Milestone[],
   budget: string,
   companySize: string,
-  timeCommitment: string
+  timeCommitment: string,
+  selectedSkills?: Skill[]
 ): void => {
-  if (milestones.length > 0) {
+  if (milestones.length > 0 || (selectedSkills && selectedSkills.length > 0)) {
     const currentRoadmap = {
       desiredRole,
       milestones,
       budget,
       companySize,
-      timeCommitment
+      timeCommitment,
+      selectedSkills
     };
     localStorage.setItem(CURRENT_ROADMAP_KEY, JSON.stringify(currentRoadmap));
   }

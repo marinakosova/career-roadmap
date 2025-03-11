@@ -54,6 +54,7 @@ export interface SavedRoadmap {
   budget?: string;
   companySize?: string;
   timeCommitment?: string;
+  selectedSkills?: Skill[];
 }
 
 export interface RoadmapContextType {
@@ -99,4 +100,5 @@ export interface RoadmapContextType {
   addMilestoneStep: (milestoneId: string, step: Omit<ActionableStep, 'id'>) => void;
   deleteMilestoneStep: (milestoneId: string, stepId: string) => void;
   toggleMilestoneFeedback: (milestoneId: string, feedback: 'like' | 'dislike') => void;
+  updateSkillProficiency: (skillName: string, proficiency: SkillProficiency) => void;
 }
