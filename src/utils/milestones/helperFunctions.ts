@@ -31,12 +31,26 @@ export const createToolsFromArray = (toolsArray: string[] = []): Array<{id: stri
 
 /**
  * Create resources from string array
+ * Handles resource strings in the format "Name - URL"
  */
-export const createResourcesFromArray = (resourcesArray: string[] = []): Array<{id: string; name: string}> => {
-  return resourcesArray.map(resource => ({
-    id: `resource-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    name: resource
-  }));
+export const createResourcesFromArray = (resourcesArray: string[] = []): Array<{id: string; name: string; url?: string}> => {
+  return resourcesArray.map(resource => {
+    // Check if resource contains URL (format: "Resource Name - https://example.com")
+    const urlMatch = resource.match(/(.*?)\s*-\s*(https?:\/\/\S+)/);
+    
+    if (urlMatch) {
+      return {
+        id: `resource-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: urlMatch[1].trim(),
+        url: urlMatch[2].trim()
+      };
+    }
+    
+    return {
+      id: `resource-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: resource
+    };
+  });
 };
 
 /**

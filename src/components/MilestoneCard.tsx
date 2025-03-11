@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, CheckSquare, Square, Calendar, Edit, Trash, ThumbsUp, ThumbsDown, MoveUp, MoveDown, Plus } from 'lucide-react';
 import { useRoadmap, ActionableStep, Skill } from '@/context/RoadmapContext';
@@ -337,8 +336,8 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
                     <h4 className="text-sm font-semibold mb-2 text-gray-700">Tools</h4>
                     <ul className="space-y-1">
                       {tools.map(tool => (
-                        <li key={tool.id} className="text-sm text-gray-600 flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
+                        <li key={tool.id} className="text-sm text-gray-600 flex items-start">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2 mt-1.5"></span>
                           {tool.name}
                         </li>
                       ))}
@@ -349,12 +348,17 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({
                 {resources.length > 0 && (
                   <div className="p-3 bg-white rounded-lg border border-gray-200">
                     <h4 className="text-sm font-semibold mb-2 text-gray-700">Resources</h4>
-                    <ul className="space-y-1">
+                    <ul className="space-y-2">
                       {resources.map(resource => (
-                        <li key={resource.id} className="text-sm text-gray-600 flex items-center">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2"></span>
+                        <li key={resource.id} className="text-sm text-gray-600 flex items-start">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary mr-2 mt-1.5"></span>
                           {resource.url ? (
-                            <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                            <a 
+                              href={resource.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-primary hover:underline"
+                            >
                               {resource.name}
                             </a>
                           ) : (

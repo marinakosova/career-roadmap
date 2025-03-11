@@ -5,6 +5,8 @@ import { companySizeAdjustments } from './milestones/companySizeAdjustments';
 import { budgetBasedResources } from './milestones/budgetBasedResources';
 import { currentStateAdjustments } from './milestones/currentStateAdjustments';
 import { roleSpecificMilestones, defaultMilestones } from './milestones/roleSpecificMilestones';
+import { roleSpecificResources, defaultResources } from './milestones/roleSpecificResources';
+import { filterResourcesByBudget, DetailedResource } from './milestones/resourceUtilities';
 import { 
   generateId, 
   createStepsFromArray, 
@@ -12,6 +14,74 @@ import {
   createResourcesFromArray,
   distributeSkillsAcrossMilestones 
 } from './milestones/helperFunctions';
+
+/**
+ * Get matching resources for a milestone title and role
+ */
+const getResourcesForMilestone = (
+  milestoneTitleOrIndex: string | number, 
+  role: string,
+  budget: string
+): DetailedResource[] => {
+  // Normalize role
+  const normalizedRole = role.toLowerCase();
+  let result: DetailedResource[] = [];
+  
+  // Check if we have resources for this role
+  const roleResources = Object.entries(roleSpecificResources).find(([key]) => 
+    normalizedRole.includes(key)
+  )?.[1];
+  
+  if (roleResources) {
+    // If milestoneTitleOrIndex is a number, try to match to common resource categories
+    if (typeof milestoneTitleOrIndex === 'number') {
+      // Map index to common categories
+      const commonCategories = [
+        ['foundation', 'basic', 'fundamental', 'introduction', 'skill_assessment'],
+        ['research', 'analysis', 'core_competency', 'data_analysis', 'ux_foundations'],
+        ['implementation', 'development', 'execution', 'practical_application'],
+        ['advanced', 'leadership', 'design', 'architecture', 'portfolio']
+      ];
+      
+      // Use the index to find relevant category patterns
+      const categoryPattern = commonCategories[Math.min(milestoneTitleOrIndex, commonCategories.length - 1)];
+      
+      // Find matching resources
+      Object.entries(roleResources).forEach(([category, resources]) => {
+        if (categoryPattern.some(pattern => category.toLowerCase().includes(pattern))) {
+          result = [...result, ...resources];
+        }
+      });
+    } else {
+      // Try to find a direct match based on title
+      const title = milestoneTitleOrIndex.toLowerCase();
+      
+      Object.entries(roleResources).forEach(([category, resources]) => {
+        // Check if the milestone title matches any part of the category
+        const categoryWords = category.split('_');
+        if (
+          categoryWords.some(word => title.includes(word)) || 
+          title.includes(category.replace('_', ' '))
+        ) {
+          result = [...result, ...resources];
+        }
+      });
+    }
+  }
+  
+  // If no specific resources found, use default resources
+  if (result.length === 0) {
+    const defaultKeys = Object.keys(defaultResources);
+    const defaultKey = typeof milestoneTitleOrIndex === 'number' 
+      ? defaultKeys[Math.min(milestoneTitleOrIndex, defaultKeys.length - 1)]
+      : defaultKeys[0];
+    
+    result = defaultResources[defaultKey];
+  }
+  
+  // Filter resources by budget
+  return filterResourcesByBudget(result, budget);
+};
 
 export const generatePersonalizedMilestones = (
   desiredRole: string,
@@ -41,9 +111,6 @@ export const generatePersonalizedMilestones = (
   
   // Get current state adjustments
   const stateAdjustments = currentStateAdjustments[currentState];
-
-  // Get budget-specific resources
-  const budgetResources = budgetBasedResources[budget] || budgetBasedResources['No budget'];
   
   // Distribute skills across milestones
   const distributedSkills = distributeSkillsAcrossMilestones(selectedSkills, baseMilestones.length);
@@ -61,6 +128,15 @@ export const generatePersonalizedMilestones = (
       enhancedDescription += ` with focus on ${sizeAdjustments.focus.join(', ')}`;
     }
     
+    // Get personalized resources for this milestone
+    const resources = getResourcesForMilestone(
+      base.title.toLowerCase().includes('foundation') || base.title.toLowerCase().includes('basic') 
+        ? index 
+        : base.title,
+      desiredRole,
+      budget
+    );
+    
     // Create milestone with all enhancements
     const milestone: Milestone = {
       id: generateId(),
@@ -72,10 +148,9 @@ export const generatePersonalizedMilestones = (
       skills: distributedSkills[index] || [],
       steps: createStepsFromArray(base.steps || []),
       tools: createToolsFromArray(base.tools || []),
-      resources: createResourcesFromArray([
-        ...(base.resources || []),
-        ...budgetResources
-      ])
+      resources: createResourcesFromArray(
+        resources.map(r => `${r.name} - ${r.url}`)
+      )
     };
     
     return milestone;
@@ -86,6 +161,38 @@ export const generatePersonalizedMilestones = (
   
   if (stateAdjustments?.priority) {
     const stateSpecificMilestones = stateAdjustments.priority.map((priority) => {
+      // Get relevant resources for this priority
+      const priorityKeywords = priority.split(' ');
+      let resourcesForPriority: DetailedResource[] = [];
+      
+      // Try to find matching resources from all role resources
+      const normalizedRole = desiredRole.toLowerCase();
+      const roleResources = Object.entries(roleSpecificResources).find(([key]) => 
+        normalizedRole.includes(key)
+      )?.[1];
+      
+      if (roleResources) {
+        Object.values(roleResources).forEach(resources => {
+          resourcesForPriority = [
+            ...resourcesForPriority,
+            ...resources.filter(r => 
+              priorityKeywords.some(keyword => 
+                r.name.toLowerCase().includes(keyword) || 
+                r.description?.toLowerCase().includes(keyword)
+              )
+            )
+          ];
+        });
+      }
+      
+      // Filter by budget
+      resourcesForPriority = filterResourcesByBudget(resourcesForPriority, budget);
+      
+      // If no specific resources found, use some defaults
+      if (resourcesForPriority.length === 0) {
+        resourcesForPriority = defaultResources.skill_assessment;
+      }
+      
       const additionalMilestone: Milestone = {
         id: generateId(),
         title: `${priority.charAt(0).toUpperCase() + priority.slice(1)}`,
@@ -107,7 +214,7 @@ export const generatePersonalizedMilestones = (
           `${priority} networking platforms`
         ]),
         resources: createResourcesFromArray(
-          budgetResources.slice(0, 3).map(resource => `${resource} for ${priority}`)
+          resourcesForPriority.map(r => `${r.name} - ${r.url}`)
         )
       };
       
