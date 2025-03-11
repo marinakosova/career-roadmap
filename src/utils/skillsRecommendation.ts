@@ -125,53 +125,32 @@ export const getRecommendedSkills = (
   const normalizedDesired = normalizeRoleName(desiredRole);
   const normalizedCurrent = normalizeRoleName(currentRole);
   
-  // Get skills for the exact desired role or similar roles
-  let targetRoles = [normalizedDesired];
-  if (!roleSkillsData[normalizedDesired]) {
-    targetRoles = findSimilarRoles(normalizedDesired);
-  }
+  // Get exact role skills or find similar roles
+  const targetSkills = roleSkillsData[normalizedDesired] || 
+    Object.entries(roleSkillsData)
+      .find(([role]) => 
+        role.includes(normalizedDesired) || 
+        normalizedDesired.includes(role)
+      )?.[1] ||
+    [];
   
-  if (targetRoles.length === 0) {
-    // Fallback to universal skills if no matching roles found
-    return universalSkills.map(skill => ({
+  // Get current role skills for transition bonus
+  const currentSkills = roleSkillsData[normalizedCurrent] || [];
+  
+  // Score and sort skills
+  const scoredSkills = targetSkills.map(skill => {
+    // Apply transition bonus if skill exists in current role
+    const transitionBonus = currentSkills.some(s => s.name === skill.name) ? 10 : 0;
+    
+    return {
       id: `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: skill.name,
       category: skill.category,
       relevance: skill.relevance,
-      score: skill.score,
+      score: skill.score + transitionBonus,
       proficiency: undefined
-    }));
-  }
-  
-  // Collect and score skills from all relevant roles
-  const skillMap = new Map<string, { skill: SkillDefinition; score: number }>();
-  
-  targetRoles.forEach(role => {
-    const skills = roleSkillsData[role] || [];
-    skills.forEach(skill => {
-      const existingSkill = skillMap.get(skill.name);
-      if (!existingSkill || existingSkill.skill.score < skill.score) {
-        // Apply role transition bonus if skill appears in both current and desired role
-        const transitionBonus = roleSkillsData[normalizedCurrent]?.some(s => s.name === skill.name) ? 10 : 0;
-        skillMap.set(skill.name, {
-          skill,
-          score: skill.score + transitionBonus
-        });
-      }
-    });
+    };
   });
-  
-  // Convert to array and sort by score
-  const recommendedSkills = Array.from(skillMap.values())
-    .sort((a, b) => b.score - a.score)
-    .map(({ skill }) => ({
-      id: `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: skill.name,
-      category: skill.category,
-      relevance: skill.relevance,
-      score: skill.score,
-      proficiency: undefined
-    }));
-  
-  return recommendedSkills;
+
+  return scoredSkills.sort((a, b) => b.score - a.score);
 };

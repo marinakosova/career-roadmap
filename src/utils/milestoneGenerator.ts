@@ -1,4 +1,3 @@
-
 import { Milestone, Skill } from '@/context/types';
 import { timelineAdjustments } from './milestones/timelineAdjustments';
 import { companySizeAdjustments } from './milestones/companySizeAdjustments';
