@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Target } from 'lucide-react';
 import MilestoneCard from '@/components/MilestoneCard';
-import { Milestone } from '@/context/RoadmapContext';
+import { Milestone, Skill } from '@/context/types';
 import { generatePersonalizedMilestones } from '@/utils/milestoneGenerator';
 
 // This maps desired roles to more specific relevant skills for each milestone phase
