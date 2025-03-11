@@ -115,7 +115,7 @@ const timeCommitments = [
 const BuildRoadmap = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [suggestedSkills, setSuggestedSkills] = useState<Array<{ name: string, category: SkillCategory }>>([]);
+  const [suggestedSkills, setSuggestedSkills] = useState<Skill[]>([]);
   const [customBudget, setCustomBudget] = useState('');
   const [showCustomBudget, setShowCustomBudget] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -415,17 +415,23 @@ const BuildRoadmap = () => {
     const normalizedRole = currentRole.toLowerCase().trim();
     
     if (normalizedRole && roleSkills[normalizedRole]) {
-      setSuggestedSkills(roleSkills[normalizedRole]);
+      const skills = roleSkills[normalizedRole].map(skill => ({
+        id: `suggested-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: skill.name,
+        category: skill.category,
+        proficiency: undefined as SkillProficiency
+      }));
+      setSuggestedSkills(skills);
     } else {
       const allSkills = Object.values(roleSkills).flat();
       const uniqueSkillNames = [...new Set(allSkills.map(skill => skill.name))];
       const mixedSkills = uniqueSkillNames.slice(0, 15).map(name => {
         const originalSkill = allSkills.find(s => s.name === name);
         return { 
-          name, 
-          category: originalSkill?.category || undefined,
           id: `suggested-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          proficiency: undefined
+          name,
+          category: originalSkill?.category || undefined,
+          proficiency: undefined as SkillProficiency
         };
       });
       setSuggestedSkills(mixedSkills);
@@ -444,7 +450,7 @@ const BuildRoadmap = () => {
           name: skillName, 
           selected: true,
           category: category,
-          proficiency: undefined
+          proficiency: undefined as SkillProficiency
         }];
       }
     });
@@ -493,7 +499,7 @@ const BuildRoadmap = () => {
     setBudget(value);
   };
 
-  const getFilteredSkills = (skills: Array<{ name: string, category?: SkillCategory }>) => {
+  const getFilteredSkills = (skills: Skill[]) => {
     if (selectedCategory === 'all') return skills;
     return skills.filter(skill => skill.category === selectedCategory);
   };
