@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   RoadmapContextType, Skill, SkillProficiency, SkillCategory, 
@@ -39,7 +38,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [nextDeadline, setNextDeadline] = useState('');
   const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>([]);
 
-  // Load saved roadmaps on mount
   useEffect(() => {
     const loadedRoadmaps = loadRoadmapsFromStorage();
     if (loadedRoadmaps.length > 0) {
@@ -47,7 +45,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, []);
 
-  // Load current roadmap on mount
   useEffect(() => {
     const currentRoadmap = loadCurrentRoadmapFromStorage();
     if (currentRoadmap) {
@@ -65,17 +62,14 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, []);
 
-  // Save roadmaps to storage when they change
   useEffect(() => {
     saveRoadmapsToStorage(savedRoadmaps);
   }, [savedRoadmaps]);
 
-  // Save current roadmap to storage when relevant state changes
   useEffect(() => {
     saveCurrentRoadmapToStorage(desiredRole, milestones, budget, companySize, timeCommitment);
   }, [milestones, desiredRole, budget, companySize, timeCommitment]);
 
-  // Save the current roadmap
   const saveRoadmap = () => {
     if (!desiredRole.trim() || milestones.length === 0) return;
 
@@ -93,12 +87,10 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  // Delete a roadmap by ID
   const deleteRoadmap = (id: string) => {
     setSavedRoadmaps(prev => prev.filter(roadmap => roadmap.id !== id));
   };
 
-  // Load a roadmap by ID
   const loadRoadmap = (id: string) => {
     const roadmap = savedRoadmaps.find(r => r.id === id);
     if (roadmap) {
@@ -124,12 +116,10 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  // Swap two milestones in the array
   const swapMilestones = (indexA: number, indexB: number) => {
     setMilestones(prevMilestones => swapMilestonesInArray(prevMilestones, indexA, indexB));
   };
 
-  // Update a step within a milestone
   const updateMilestoneStep = (milestoneId: string, stepId: string, updates: Partial<ActionableStep>) => {
     setMilestones(prevMilestones => {
       const updatedMilestones = updateStepInMilestone(prevMilestones, milestoneId, stepId, updates);
@@ -139,12 +129,10 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  // Add a new step to a milestone
   const addMilestoneStep = (milestoneId: string, step: Omit<ActionableStep, 'id'>) => {
     setMilestones(prevMilestones => addStepToMilestone(prevMilestones, milestoneId, step));
   };
 
-  // Delete a step from a milestone
   const deleteMilestoneStep = (milestoneId: string, stepId: string) => {
     setMilestones(prevMilestones => {
       const updatedMilestones = deleteStepFromMilestone(prevMilestones, milestoneId, stepId);
@@ -154,7 +142,6 @@ export const RoadmapProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  // Toggle feedback for a milestone
   const toggleMilestoneFeedback = (milestoneId: string, feedback: 'like' | 'dislike') => {
     setMilestones(prevMilestones => toggleFeedbackForMilestone(prevMilestones, milestoneId, feedback));
   };
@@ -219,14 +206,11 @@ export const useRoadmap = (): RoadmapContextType => {
   return context;
 };
 
-// Re-export types for easier access
-export {
-  SkillProficiency,
-  SkillCategory,
-  Skill,
-  ActionableStep,
-  Tool,
-  Resource,
-  Milestone,
-  SavedRoadmap
-} from './types';
+export type { SkillProficiency } from './types';
+export type { SkillCategory } from './types';
+export type { Skill } from './types';
+export type { ActionableStep } from './types';
+export type { Tool } from './types';
+export type { Resource } from './types';
+export type { Milestone } from './types';
+export type { SavedRoadmap } from './types';
