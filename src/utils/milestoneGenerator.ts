@@ -1,3 +1,4 @@
+
 import { Milestone, Skill } from '@/context/types';
 import { timelineAdjustments } from './milestones/timelineAdjustments';
 import { companySizeAdjustments } from './milestones/companySizeAdjustments';
@@ -102,6 +103,92 @@ export const generatePersonalizedMilestones = (
     }
   }
   
+  // Support specialist specific milestones
+  if (normalizedRole.includes('support')) {
+    baseMilestones = [
+      {
+        title: "Customer Support Foundation",
+        description: "Master the basics of customer service and support fundamentals",
+        timeline: "1 month",
+        steps: [
+          "Research industry standard customer service practices",
+          "Learn to effectively communicate with different customer types",
+          "Practice active listening techniques",
+          "Study documentation best practices"
+        ],
+        tools: [
+          "Zendesk Academy",
+          "HubSpot Service Hub",
+          "Customer service simulation tools"
+        ],
+        resources: [
+          "Customer Support Handbook - Intercom",
+          "Support Driven Community Resources"
+        ]
+      },
+      {
+        title: "Technical Knowledge Building",
+        description: "Develop the technical expertise needed for effective support",
+        timeline: "2 months",
+        steps: [
+          "Identify key technical areas to master",
+          "Complete product/service training",
+          "Learn troubleshooting methodologies",
+          "Practice explaining technical concepts simply"
+        ],
+        tools: [
+          "Knowledge base software",
+          "Troubleshooting guides",
+          "Help desk systems"
+        ],
+        resources: [
+          "Technical Support Fundamentals - Coursera",
+          "IT Support Professional Certificate"
+        ]
+      },
+      {
+        title: "Support Process Mastery",
+        description: "Learn to handle support tickets efficiently and effectively",
+        timeline: "1 month",
+        steps: [
+          "Master ticket management workflows",
+          "Learn prioritization techniques",
+          "Study escalation processes",
+          "Practice multi-tasking efficiently"
+        ],
+        tools: [
+          "Ticketing systems",
+          "SLA management tools",
+          "Internal knowledge bases"
+        ],
+        resources: [
+          "The Definitive Guide to Support Ticketing Systems",
+          "ITIL Foundation training materials"
+        ]
+      },
+      {
+        title: "Customer Success Strategies",
+        description: "Move beyond reactive support to proactive customer success",
+        timeline: "2 months",
+        steps: [
+          "Learn to identify potential customer issues before they occur",
+          "Create customer onboarding materials",
+          "Develop customer check-in strategies",
+          "Build a customer feedback collection system"
+        ],
+        tools: [
+          "Customer success platforms",
+          "User analytics tools",
+          "Customer feedback software"
+        ],
+        resources: [
+          "Customer Success: How Innovative Companies Are Reducing Churn",
+          "The Customer Success Professional's Handbook"
+        ]
+      }
+    ];
+  }
+  
   // Get time commitment multiplier
   const timelineMultiplier = timelineAdjustments[timeCommitment] || 1;
   
@@ -158,7 +245,7 @@ export const generatePersonalizedMilestones = (
   // Add state-specific milestones if available
   let finalMilestones = [...personalizedMilestones];
   
-  if (stateAdjustments?.priority) {
+  if (stateAdjustments?.priority && currentState) {
     const stateSpecificMilestones = stateAdjustments.priority.map((priority) => {
       // Get relevant resources for this priority
       const priorityKeywords = priority.split(' ');

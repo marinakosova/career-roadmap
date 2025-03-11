@@ -14,7 +14,8 @@ const similarRolesMap: Record<string, string[]> = {
   'Marketing Manager': ['Brand Manager', 'Digital Marketing Manager', 'Content Marketing Manager', 'Growth Marketer', 'SEO Specialist'],
   'Data Analyst': ['Business Analyst', 'Data Engineer', 'BI Developer', 'Analytics Specialist', 'Financial Analyst'],
   'Project Manager': ['Scrum Master', 'Program Manager', 'Agile Coach', 'Delivery Manager', 'Technical Project Manager'],
-  'Backend Engineer': ['API Developer', 'Database Administrator', 'Systems Engineer', 'Cloud Engineer', 'Infrastructure Developer']
+  'Backend Engineer': ['API Developer', 'Database Administrator', 'Systems Engineer', 'Cloud Engineer', 'Infrastructure Developer'],
+  'Support Specialist': ['Customer Support Representative', 'Technical Support Engineer', 'Help Desk Specialist', 'Customer Success Manager', 'Service Desk Analyst']
   // Add more role mappings as needed
 };
 
@@ -50,7 +51,9 @@ export const OverviewSection = ({ desiredRole }: { desiredRole?: string }) => {
       'data': ['Data Analyst', 'Data Scientist', 'Data Engineer', 'Business Intelligence Analyst', 'Database Administrator'],
       'developer': ['Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'Mobile Developer', 'DevOps Engineer'],
       'manager': ['Product Manager', 'Project Manager', 'Engineering Manager', 'Marketing Manager', 'Customer Success Manager'],
-      'designer': ['UX Designer', 'UI Designer', 'Product Designer', 'Graphic Designer', 'Web Designer']
+      'designer': ['UX Designer', 'UI Designer', 'Product Designer', 'Graphic Designer', 'Web Designer'],
+      'support': ['Technical Support Specialist', 'Customer Support Representative', 'IT Support Specialist', 'Help Desk Technician', 'Customer Success Manager'],
+      'specialist': ['Technical Specialist', 'Support Specialist', 'Marketing Specialist', 'HR Specialist', 'IT Specialist']
     };
     
     for (const [keyword, roles] of Object.entries(keywordMap)) {

@@ -90,8 +90,9 @@ export const generateTools = (milestoneTitle: string) => {
   
   if (milestoneTitle.includes('Skill Assessment')) {
     tools.push(
-      { id: `tool-${Date.now()}-1`, name: 'LinkedIn Skill Assessments' },
-      { id: `tool-${Date.now()}-2`, name: 'Skill Radar Chart Maker' }
+      { id: `tool-${Date.now()}-1`, name: 'Skill assessment tools' },
+      { id: `tool-${Date.now()}-2`, name: 'Skill planning software' },
+      { id: `tool-${Date.now()}-3`, name: 'Skill networking platforms' }
     );
   } else if (milestoneTitle.includes('Learning Path')) {
     tools.push(
