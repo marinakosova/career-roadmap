@@ -46,7 +46,7 @@ const RoadmapTabs: React.FC<RoadmapTabsProps> = ({
       </TabsContent>
 
       <TabsContent value="milestones" className="pt-8 animate-fade-in-up">
-        <MilestonesSection milestones={milestones} />
+        <MilestonesSection milestones={milestones} desiredRole={desiredRole} />
       </TabsContent>
 
       <TabsContent value="resources" className="pt-8 animate-fade-in-up">

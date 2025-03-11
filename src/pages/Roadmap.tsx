@@ -29,6 +29,13 @@ const Roadmap = () => {
     }
   }, [milestones]);
 
+  // Set the document title
+  useEffect(() => {
+    document.title = desiredRole 
+      ? `Your roadmap to becoming a ${desiredRole}`
+      : "Your Career Roadmap";
+  }, [desiredRole]);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <Navigation />

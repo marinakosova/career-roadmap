@@ -50,9 +50,10 @@ const roleSpecificSkills: Record<string, string[][]> = {
 
 interface MilestonesSectionProps {
   milestones: Milestone[];
+  desiredRole?: string;
 }
 
-const MilestonesSection: React.FC<MilestonesSectionProps> = ({ milestones }) => {
+const MilestonesSection: React.FC<MilestonesSectionProps> = ({ milestones, desiredRole }) => {
   // Add relevant, realistic skills to each milestone based on its position in the roadmap
   const enhanceSkillsForMilestones = (milestones: Milestone[], desiredRole: string = 'default'): Milestone[] => {
     const roleSkills = roleSpecificSkills[desiredRole] || roleSpecificSkills.default;
@@ -78,7 +79,7 @@ const MilestonesSection: React.FC<MilestonesSectionProps> = ({ milestones }) => 
   };
 
   // Get the enhanced milestones with more relevant skills
-  const enhancedMilestones = enhanceSkillsForMilestones(milestones);
+  const enhancedMilestones = enhanceSkillsForMilestones(milestones, desiredRole);
 
   return (
     <div className="space-y-8">
